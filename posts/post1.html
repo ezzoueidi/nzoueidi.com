@@ -1,4 +1,4 @@
-<center>Everything you need to know to start using GnuPG with Mutt</center>
+<center><h2>Using GnuPG with Mutt</h2></center>
 <br/><br/>
 
 Hello all, well first of all I am writing this post for a couple of reasons. In the fact for <b>three reasons.</b><br/>
@@ -14,7 +14,57 @@ Hello all, well first of all I am writing this post for a couple of reasons. In 
 
 		<li>I enjoy writing posts, especially that this is my 1st post and I hope that this one is of use to many people.  I did a lot of research <br/>
 			and I figured a number of things out on my own, and now I want to help people along.</li>
-</ol>	
+</ol>
+<br/>
+OK, so before I write any further lines, I assume that you know already Mutt and you know how to configure GnuPG, protecting your private key <br/>
+and how you publish your public key and many other things like why you need to sign your send-mail, and how they are made, etc.. <br/>
+Well, if you don't know those, you need to duckduck it, and if you didn't have a complete understanding of all those things and more, mail me <br/>
+and I will answer about any questions and why not writing another post about those things. <br/><br/>
+
+If you still here, then I think you know what I was talking about, so let's begin! :D <br/><br/>
+
+In order to use Mutt with GnuPG, PGP support must be compiled in when building Mutt (this happens by default). <br/>
+Also, you need to add some directives to your .muttrc (or source a file containing these directives) which tells Mutt how to interact with GnuPG.  <br/>
+Here are the commands that everyone use:  <br/><br/>
+<code>
+set pgp_decode_command="gpg %?p?--passphrase-fd 0? --no-verbose --batch --output - %f"
+set pgp_verify_command="gpg --no-verbose --batch --output - --verify %s %f"
+set pgp_decrypt_command="gpg --passphrase-fd 0 --no-verbose --batch --output - %f"
+set pgp_sign_command="gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --detach-sign --textmode %?a?-u %a? %f"
+set pgp_clearsign_command="gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --textmode --clearsign %?a?-u %a? %f"
+set pgp_encrypt_only_command="pgpewrap gpg --batch --quiet --no-verbose --output - --encrypt --textmode --armor --always-trust --encrypt-to 0x71f3c5ce -- -r %r -- %f"
+set pgp_encrypt_sign_command="pgpewrap gpg --passphrase-fd 0 --batch --quiet --no-verbose --textmode --output - --encrypt --sign %?a?-u %a? --armor --always-trust --encrypt-to 0x71f3c5ce -- -r %r -- %f"
+set pgp_import_command="gpg --no-verbose --import -v %f"
+set pgp_export_command="gpg --no-verbose --export --armor %r"
+set pgp_verify_key_command="gpg --no-verbose --batch --fingerprint --check-sigs %r"
+set pgp_list_pubring_command="gpg --no-verbose --batch --with-colons --list-keys %r" 
+set pgp_list_secring_command="gpg --no-verbose --batch --with-colons --list-secret-keys %r" 
+set pgp_autosign=yes
+set pgp_sign_as=0x71f3c5ce
+set pgp_replyencrypt=yes
+set pgp_timeout=1800
+set pgp_good_sign="^gpg: Good signature from"
+</code> <br/>
+And this is my <a href="https://github.com/nzoueidi/mutt-config">repo</a> on github contains all the content of the folder .mutt/ that I use.
+<br/>
+<br/>
+Aside from the basic commands necessary to inter-operate with GnuPG, these directives also tell Mutt to automatically sign all outgoing <br/>
+messages using key ID 0x71f3c5ce (my key), to encrypt all encrypted mail to me as well (for storage in my 'sent' folder, and to cache my <br/>
+passphrase for a half hour.  
+
+<br/><br/>
+
+So, what you neew to do know is trying it all out \o/ <br/>
+
+
+Mutt should be ready to go at this point.  The first time you send a message, Mutt will ask you for your passphrase, which it will then <br/>
+cache, then it will sign all outgoing messages.  When you receive a signed message, Mutt will use the sender's public key (fetching it if it <br/>
+has to) to verify the signature.  When encrypting messages, it will ask for your passphrase (if not cached) and will present you with a menu of <br/>
+public keys that it believes match the intended recipient.  Lastly, when decrypting messages, it will ask you for your passphrase if the cache <br/>
+has expired or it hasn't been entered yet.  <br/><br/>
+
+<b>o/</b>
+
 
 
 
