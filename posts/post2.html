@@ -19,8 +19,8 @@ So to switch to our new branch we do simply <code> git checkout tutorial </code>
 Let's start looking to make a patch! There's a good tool made by Perl[2] language we can find it in scripts/checkpatch.pl <br/>
 Until now, we don't know how we can use it so let's run <code>scripts/checkpatch.pl --help</code> you can find a useful informations there. <br/>
 That script actually it search if there is some code style[3] problems and tells you kindly to fix it! :D The normal use of this tool is <br/>
-<code scripts/checkpatch.pl <b>-f</b> any_file_you_like_to_check_it </code> <br/>
-It shows you something like that if the file have some things to fix. <br/>
+<br/><code> scripts/checkpatch.pl <b>-f</b> any_file_you_like_to_check_it </code> <br/><br/>
+It shows you something like that if the file have some things to fix. <br/><br/>
 <code>
 ERROR: REASON <br/>
 #LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
@@ -29,6 +29,14 @@ ERROR: REASON <br/>
 WARNING: REASON<br/>
 #LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
 + THE LINE YOU NEED TO EDIT IT<br/>
-</code><br/>
+</code><br/><br/>
+It is so easy right! Find the right place to made your patch then edit on the file you run the checkpatch tool on it. <br/>
+To edit the file, of course you need to use some console editors there's a lot of examples but I prefer VIM[3] cause it have a nice <br/>
+color syntax highlighting. It is generaly on by default when you download vim but if you don't. You should edit on your file configuration <br/>
+<code> .vimrc </code> and add <code> syntax on </code> <br/>
+Then, fix the ERROR/WARNNING/CHECK that you got it when you ran the checkpatch tool. <br/>
+After all, it is a good idea if you compile the file to see if your patch breaked the build! Even the advanced developers/contributors<br/>
+compile their patch to see if there is anything goes wrong. <br/>
+
 
 
