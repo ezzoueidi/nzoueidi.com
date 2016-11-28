@@ -4,6 +4,35 @@ Hello all, in this post I am not going to show how you could install tmux or how
 So, what you need is duckduck it and you well see a lot of tutorials.. <br/>
 What I am going to write here is the power of tmux and why every developer/sysadmin need it. <br/>
 First of all, why they call it <b>TMux</b>? <br/>
-It is because <>T</b> stand for <b>T</b>erminal and <b>Mux</b> for<b> Mu</b>ltiple<b>x</b>er.<br/>
+It is because <b>T</b> stand for <b>T</b>erminal and <b>Mux</b> for<b> Mu</b>ltiple<b>x</b>er.<br/>
 Based on WiKipedia<b>[1]</b> Multiplexer means one thing do a lot of different things.. <br/><br/>
 OK, so let's begin with 
+Why I like the most in tmux is that it supported both vertical and horizontal splits whereas GNU Screen only supported one of the two (which of them, I forget).<br/>
+One of the other reasons that I like tmux, is for pair programming. <br/>
+Let's say you are working with a big team and all the team need to look how you code in the real time.. It would be much better to all SSH into a single box and watch as one person edits code. <br/>
+Much nicer than crowding around someone's laptop, which isn't feasible given the seating arrangements at play.<br/>
+The final and the most important reason for me is long running processes on random servers. I have a VM with an Ubuntu install for various things (testing, packaging, etc..),<br/>
+I have a tmux session which helps provide me context from one editing session to another.<br/>
+Tmux is also a boon when dealing with a flaky wifi connection. Being able to resume the in-progress terminal screen is nice, so you don't have orphaned processes when your connection dies.<br/>  
+<br/>
+Terminal multiplexers have a command mode in which you can tell it to do something, such as switching virtual consoles or creating new ones.<br/>
+In tmux the short-cut key to this command mode, called the prefix, is by default Ctrl-b, but if you want to change it, very simple just add the following to your ~/.tmux.conf <br/>
+<code>
+# Set the prefix to ^A<br/>
+unbind C-b<br/>
+set -g prefix ^A<br/><br/>
+
+# So that you can go to the beginning of the line with ^A a<br/>
+bind a send-prefix<br/>
+</code><br/>
+Ctrl-a is in my opinion also easier to reach than Ctrl-b. <br/>
+So, I will use Ctrl-a as the prefix key in the rest of this article. It will be shown as ^A. <br/><br/>
+Now that you are ready to use tmux, start it up. I make it a habit to give each tmux session a name, so that I can easily re-attach it by using the name: <br/>
+<code>
+$ tmux new -s base
+</code><br/>
+In this example, I have called the tmux session "base". <br/>
+But rather than executing this command everytime when you open your terminal, you add this line to your ~/.zshrc if you are using ZSH or ~/.bashrc if you are using BAHS  <br/>
+<code> tmux attach -t base || tmux new -s base</code>
+<br/>
+
