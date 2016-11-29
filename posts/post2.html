@@ -37,4 +37,18 @@ In this example, I have called the tmux session "base". <br/>
 But rather than executing this command everytime when you open your terminal, you add this line to your ~/.zshrc if you are using ZSH or ~/.bashrc if you are using BASH  <br/>
 <br/><code> tmux attach -t base || tmux new -s base</code>
 <br/>
+Allright, so let's say you want to create some virtual consoles. Hit <code>^A c</code>. In the status bar, you will see that you have created another virtual console, with bash/zsh running in it.<br/>
+The <b>*</b> means that that one is currently shown. Start any CLI tool and the name of your virtual console will change depending to what you have opened.<br/>
+I think you are wondering I wanna set up a uniq name to my virtual console! Yep you can hit <code>^A ,</code> and rename it! :D <br/>
+So, now I have more then one virtual console, how can I switch from one to another? Simply to switch hit <code>^A p </code>or<code> ^A n</code><br/>
+The letters stand for previous and next console. Likewise, you can switch using numbers <code>^A 0 </code> for the 1st console and 1 for the 2nd etc.. <br/><br/>
+In Tmux also you can split windows vertically and horizontally using the prefix which is<code> ^A</code> and <b> %</b> for vertical split and <b>" </b> for horizontal split.<br/>
+To navigate through spliw windows, you can use <code>^A o</code> but I prefer using <code>^A arrow keys</code> <br/>
+Resizing the split windows is pretty easy also, keep the Control key pressed and use you the arrow keys to resize the currently focused spliw window<br/>
+One of the great features of Tmux is that you can deattach and reattach your tmux session whenever you want!<br/>
+Deattaching it simply with <code>^A d </code> and if you want to reattach it, remember the name of the dettached session, if you forgot it is okay! <code> tmux ls </code> will list yo you all your tumux sessions<br/>
+then like I mention above to reattach it <code> tmux attach -t name_of_your_session </code>
+Allright, I will stop here and I will try to post another article about advanced customizations. I am trying to keep this article short and not boring as it is :P <br/>
+That's it, thank you for reading and feel free to send me a mail if you noticed that there's a typos or something is not enough clear!
 
+Cheers <b>o/</b>
