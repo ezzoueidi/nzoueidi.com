@@ -19,7 +19,7 @@ Tmux is also a boon when dealing with a flaky wifi connection. Being able to res
 <br/>
 Terminal multiplexers have a command mode in which you can tell it to do something, such as switching virtual consoles or creating new ones.<br/>
 In tmux the short-cut key to this command mode, called the prefix, is by default Ctrl-b, but if you want to change it, very simple just add the following to your ~/.tmux.conf <br/>
-<code>
+<br/><code>
 # Set the prefix to ^A<br/>
 unbind C-b<br/>
 set -g prefix ^A<br/><br/>
@@ -34,7 +34,7 @@ Now that you are ready to use tmux, start it up. I make it a habit to give each 
 $ tmux new -s base
 </code><br/>
 In this example, I have called the tmux session "base". <br/>
-But rather than executing this command everytime when you open your terminal, you add this line to your ~/.zshrc if you are using ZSH or ~/.bashrc if you are using BAHS  <br/>
-<code> tmux attach -t base || tmux new -s base</code>
+But rather than executing this command everytime when you open your terminal, you add this line to your ~/.zshrc if you are using ZSH or ~/.bashrc if you are using BASH  <br/>
+<br/><code> tmux attach -t base || tmux new -s base</code>
 <br/>
 
