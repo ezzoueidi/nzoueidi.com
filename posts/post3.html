@@ -1,42 +1,247 @@
-<center><b>A several ways to contribute to the Linux kernel</b></center> <br/><br/>
+Hello guys, is this post I will try to mention most commands about Git that I use it daily at work or with other stuff.<br/>
 
-Hello all, this is my 2nd post I will talk about the Linux kernel, I will mention some importants tricks & questions every begineer <br/>
-wanna know them to start his career on the Linux kernel!<br/>
-Well, first of all let's start by asking why I need to learn this! Should I be an extra skilled ninja on C programming?<br/>
-Should I know all the commands of Linux! :O <br/>
-Haha, the answer is very simple, you don't need to be a <b>ninja</b> guy on C nor on the commands of Linux! <br/><br/>
-All what you need is the willing to learn/help/contribute ;) <br/>
-OK, let's begin then <br/>
-You need to know some <b>GIT</b>[1] commands, here is a brief of what you need mostly on this road. <br/><br/>
-<code> git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git </code> <br/><br/>
-Here what we are doing, is that we are telling git to clone us this repository to our local machine.<br/>
-Then, the next step is to go to the place where we cloned our repository and create a branch to write and compile/build our patch <br/>
-into the kernel <br/><br/>
-<code> git branch tutorial</code><br/><br/>
-OK, let's see in what branch we are, <code> git status </code> it will give you if you are in the right place <code> On branch master </code> <br/>
-Let's see the last commit which is generaly made by Linus <code> git show HEAD</code> <br/>
-So to switch to our new branch we do simply <code> git checkout tutorial </code><br/>
-Let's start looking to make a patch! There's a good tool made by Perl[2] language we can find it in scripts/checkpatch.pl <br/>
-Until now, we don't know how we can use it so let's run <code>scripts/checkpatch.pl --help</code> you can find a useful informations there. <br/>
-That script actually it search if there is some code style[3] problems and tells you kindly to fix it! :D The normal use of this tool is <br/>
-<br/><code> scripts/checkpatch.pl <b>-f</b> any_file_you_like_to_check_it </code> <br/><br/>
-It shows you something like that if the file have some things to fix. <br/><br/>
+Not all commands written here are git commands, but all of them are related to git. Please refer to the documentation for more details.
+<br/>
+<b>Set your details</b>
 <code>
-ERROR: REASON <br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/><br/>
+	git config --global user.name "John Doe"<br/>
+	git config --global user.email "john@example.com"<br/>
+</code>
 
-WARNING: REASON<br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/>
-</code><br/><br/>
-It is so easy right! Find the right place to made your patch then edit on the file you run the checkpatch tool on it. <br/>
-To edit the file, of course you need to use some console editors there's a lot of examples but I prefer VIM[3] cause it have a nice <br/>
-color syntax highlighting. It is generaly on by default when you download vim but if you don't. You should edit on your file configuration <br/>
-<code> .vimrc </code> and add <code> syntax on </code> <br/>
-Then, fix the ERROR/WARNNING/CHECK that you got it when you ran the checkpatch tool. <br/>
-After all, it is a good idea if you compile the file to see if your patch breaked the build! Even the advanced developers/contributors<br/>
-compile their patch to see if there is anything goes wrong. <br/>
+Use --global to set the configuration for all projects. If git config is used without --global and run inside a project directory,<br/>
+the settings are set for the specific project.
+<br/>
 
+<b>Make git ignore file modes</b>
+<code>
+	cd project/ <br/>
+	git config core.filemode false<br/>
+</code>
 
+This option is useful if the file permissions are not important to us. <br/>
+<br>
+<b>See your settings</b><br/>
+<code>
+	git config --list<br/>
+</code>
 
+<b>Initialize a git repository for existing code</b>
+<br>
+<code>
+	cd existing-project/<br/>
+	git init<br/>
+</code><br/>
+
+<b>Clone a remote repository</b><br/>
+<code>
+	git clone https://github.com/user/repository.git<br/>
+</code>
+
+This creates a new directory with the name of the repository.<br/>
+<b>Clone a remote repository in the current directory</b><br/>
+<code>
+	git clone https://github.com/user/repository.git . <br/>
+</code>
+<b>Get help for a specific git command</b>
+</br>
+<code>git help clone</code>
+<br/>
+
+<b>Update and merge your current branch with a remote</b>
+<br/>
+<code>
+	cd repository/<br/>
+	git pull origin master<br/>
+</code>
+<br/>
+Where origin is the remote repository, and master the remote branch.<br/>
+If you don't want to merge your changes, use git fetch<br/>
+<b>View remote urls</b>
+<code>
+	git remote -v<br/>
+</code>
+<b>Change origin url</b>
+<br/>
+<code>
+	git remote set-url origin http//github.com/repo.git<br/>
+</code>
+<b>Add remote</b>
+	<br/>	
+</code>
+	git remote add remote-name https://github.com/user/repo.git<br/>
+
+</code>
+<b>See non-staged (non-added) changes to existing files</b><br/>
+	<code>
+		git diff<br/>
+	</code>
+	Note that this does not track new files.<br/>
+
+	<b>See staged, non-commited changes</b><br/>
+<code>
+	git diff --cached<br/>
+</code>
+<b>See differences between local changes and master</b>
+<br/>
+<code>
+	git diff origin/master<br/>
+</code>
+Note that origin/master is one local branch, a shorthand for refs/remotes/origin/master, which is the full name of the remote-tracking branch.<br/>
+<b>See differences between two commits</b>
+<br/>
+<code>
+	git diff COMMIT1_ID COMMIT2_ID<br/>
+</code>
+<b>See the files changed between two commits</b>
+<br/><code>
+git diff --name-only COMMIT1_ID COMMIT2_ID
+</code>
+<br/><b>See the files changed in a specific commit</b>
+<code>
+git diff-tree --no-commit-id --name-only -r COMMIT_ID
+<br/></code>
+<i>or</i><br/>
+<code>
+	git show --pretty="format:" --name-only COMMIT_ID<br/>
+</code>
+<b>source</b>: http://stackoverflow.com/a/424142/1391963<br/>
+<b>See diff before push</b>
+<br/>
+<code>
+git diff --cached origin/master
+</code><br/>
+<b>See details (log message, text diff) of a commit</b><br/>
+	<code>
+		git show COMMIT_ID<br/>
+	</code>
+	<b>Check the status of the working tree (current branch, changed files...)</b>
+	<br/>
+	<code>
+git status
+	</code>
+	<br/>
+
+	<b>Make some changes, commit them
+	</b><br/>
+	<code>
+		git add changed_file.txt<br/>
+		git add folder-with-changed-files/<br/>
+		git commit -m "Commiting changes"<br/>
+	</code>
+	<b>
+Rename/move and remove files
+	</b><br/>
+	<code>
+		git rm removeme.txt tmp/crap.txt<br/>
+		git mv file_oldname.txt file_newname.txt<br/>
+		git commit -m "deleting 2 files, renaming 1"<br/>
+	</code>
+	<b>
+Change message of last commit
+	</b><br/>
+	<code>
+git commit --amend -m "New commit message"
+	</code>
+	<br/>
+	<b>
+Push local commits to remote branch
+	</b><br/><code>
+		git push origin master<br/>
+	</code>
+	<b>See recent commit history</b></br>
+		<code>
+			git log<br/>
+		</code>
+		<b>See commit history for the last two commits
+		</b></br><code>
+			git log -2</br>
+		</code>
+		<b>
+See commit history for the last two commits, with diff
+		</b><br/><code>
+git log -p -2
+		</code><br/><b>
+See commit history printed in single lines
+		</b><br><code>
+		git log --pretty=oneline</code>
+		<br/>	<b>
+Revert one commit, push it
+		</b><code>
+			git revert dd61ab21<br/>
+git push origin master<br/>	
+		</code>
+		<b>
+Revert to the moment before one commit
+		</b><br/><code>
+			# reset the index to the desired tree<br/>
+			git reset 56e05fced<br/>
+		
+			# move the branch pointer back to the previous HEAD<br/>
+			git reset --soft HEAD@{1}<br/>
+			<br/>
+			git commit -m "Revert to 56e05fced"<br/>
+			<br/>
+			# Update working copy to reflect the new commit<br/>
+			git reset --hard<br/>
+		</code>
+		<b>Source:</b> http://stackoverflow.com/q/1895059/1391963
+		<b>Undo last commit, preserving local changes</b><br/>
+			<code>
+				git reset --soft HEAD~1<br/>
+			</code>
+			<b>
+Undo last commit, without preserving local changes
+			</b><br><code>
+				git reset --hard HEAD~1<br/>
+			</code><b>
+Undo last commit, preserving local changes in index
+			</b><br/>
+			<code>
+			git reset --mixed HEAD~1
+</code>
+<i>Or </i><code>
+git reset HEAD~1
+</code>
+<br/>
+<b>See also</b> http://stackoverflow.com/q/927358/1391963
+<b>Undo non-pushed commits</b><br/>
+<code>
+	git reset origin/master<br/>
+</code>
+<b>Reset to remote state</b><br/>
+<code>
+git fetch origin<br/>
+git reset --hard origin/master</br>
+</code>
+<b>See local branches</b><br/>
+<code>
+git branch<br/>
+</code>
+<b>See all branches</b><br/>
+<code>
+git branch -a<br/>
+</code>
+<b>Make some changes, create a patch</b><br/>
+<code>
+	git diff > patch-issue-1.patch<br/>
+</code>
+<b>Add a file and create a patch</b><br/>
+<code>
+	git add newfile<br/>
+	git diff --staged > patch-issue-2.patch<br/>
+</code>
+<b>Add a file, make some changes, and create a patch<b><br/>
+
+<code>
+git add newfile<br/>
+git diff HEAD > patch-issue-2.patch<br/>
+</code>
+<b>Make a patch for a commit</b><br>
+<code>
+git format-patch COMMIT_ID<br/>
+</code>
+<b>Make patches for the last two commits</b><br/>
+<code>
+	git format-patch HEAD~2<br/>
+
+</code>
