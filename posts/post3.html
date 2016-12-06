@@ -39,76 +39,76 @@ This option is useful if the file permissions are not important to us. <br/>
 <code>
 	git clone https://github.com/user/repository.git<br/>
 </code>
-
+<br/>
 This creates a new directory with the name of the repository.<br/>
-<b>Clone a remote repository in the current directory</b><br/>
+<br/><b>Clone a remote repository in the current directory</b><br/>
 <code>
 	git clone https://github.com/user/repository.git . <br/>
 </code>
-<b>Get help for a specific git command</b>
+<br/><b>Get help for a specific git command</b>
 </br>
 <code>git help clone</code>
 <br/>
-
+<br/>
 <b>Update and merge your current branch with a remote</b>
 <br/>
 <code>
 	cd repository/<br/>
 	git pull origin master<br/>
 </code>
-<br/>
+<br/><br/>
 Where origin is the remote repository, and master the remote branch.<br/>
 If you don't want to merge your changes, use git fetch<br/>
-<b>View remote urls</b>
+<br/><b>View remote urls</b>
 <code>
 	git remote -v<br/>
-</code>
+</code><br/>
 <b>Change origin url</b>
 <br/>
 <code>
 	git remote set-url origin http//github.com/repo.git<br/>
-</code>
+</code><br/>
 <b>Add remote</b>
 	<br/>	
 </code>
 	git remote add remote-name https://github.com/user/repo.git<br/>
 
-</code>
+	</code><br/>
 <b>See non-staged (non-added) changes to existing files</b><br/>
 	<code>
 		git diff<br/>
-	</code>
+	</code><br/>
 	Note that this does not track new files.<br/>
-
+	<br/>
 	<b>See staged, non-commited changes</b><br/>
 <code>
 	git diff --cached<br/>
-</code>
+</code><br/>
 <b>See differences between local changes and master</b>
 <br/>
 <code>
 	git diff origin/master<br/>
-</code>
+</code><br/>
 Note that origin/master is one local branch, a shorthand for refs/remotes/origin/master, which is the full name of the remote-tracking branch.<br/>
-<b>See differences between two commits</b>
+<br/><b>See differences between two commits</b>
 <br/>
 <code>
 	git diff COMMIT1_ID COMMIT2_ID<br/>
-</code>
+</code><br/>
 <b>See the files changed between two commits</b>
 <br/><code>
 git diff --name-only COMMIT1_ID COMMIT2_ID
 </code>
 <br/><b>See the files changed in a specific commit</b>
-<code>
+<br/><code>
 git diff-tree --no-commit-id --name-only -r COMMIT_ID
-<br/></code>
-<i>or</i><br/>
+<br/></code><br/>
+<i>or</i><br/><br/>
 <code>
 	git show --pretty="format:" --name-only COMMIT_ID<br/>
-</code>
+</code><br/>
 <b>source</b>: http://stackoverflow.com/a/424142/1391963<br/>
-<b>See diff before push</b>
+<br/><b>See diff before push</b>
 <br/>
 <code>
 git diff --cached origin/master
@@ -116,7 +116,7 @@ git diff --cached origin/master
 <b>See details (log message, text diff) of a commit</b><br/>
 	<code>
 		git show COMMIT_ID<br/>
-	</code>
+	</code><br/>
 	<b>Check the status of the working tree (current branch, changed files...)</b>
 	<br/>
 	<code>
@@ -131,15 +131,15 @@ git status
 		git add folder-with-changed-files/<br/>
 		git commit -m "Commiting changes"<br/>
 	</code>
-	<b>
+	<br><b>
 Rename/move and remove files
-	</b><br/>
+	</b>
 	<code>
 		git rm removeme.txt tmp/crap.txt<br/>
 		git mv file_oldname.txt file_newname.txt<br/>
 		git commit -m "deleting 2 files, renaming 1"<br/>
 	</code>
-	<b>
+	<br><b>
 Change message of last commit
 	</b><br/>
 	<code>
