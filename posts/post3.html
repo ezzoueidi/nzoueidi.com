@@ -27,7 +27,7 @@ This option is useful if the file permissions are not important to us. <br/>
 <code>
 	git config --list<br/>
 </code>
-
+<br/>
 <b>Initialize a git repository for existing code</b>
 <br>
 <code>
@@ -60,7 +60,7 @@ This creates a new directory with the name of the repository.<br/>
 Where origin is the remote repository, and master the remote branch.<br/>
 If you don't want to merge your changes, use git fetch<br/>
 <br/><b>View remote urls</b>
-<code>
+<br/><code>
 	git remote -v<br/>
 </code><br/>
 <b>Change origin url</b>
@@ -111,7 +111,7 @@ git diff-tree --no-commit-id --name-only -r COMMIT_ID
 <br/><b>See diff before push</b>
 <br/>
 <code>
-git diff --cached origin/master
+	git diff --cached origin/master<br/>
 </code><br/>
 <b>See details (log message, text diff) of a commit</b><br/>
 	<code>
@@ -120,7 +120,7 @@ git diff --cached origin/master
 	<b>Check the status of the working tree (current branch, changed files...)</b>
 	<br/>
 	<code>
-git status
+		git status<br/>
 	</code>
 	<br/>
 
@@ -131,7 +131,7 @@ git status
 		git add folder-with-changed-files/<br/>
 		git commit -m "Commiting changes"<br/>
 	</code>
-	<br><b>
+	<br/><b>
 Rename/move and remove files
 	</b>
 	<code>
@@ -139,7 +139,7 @@ Rename/move and remove files
 		git mv file_oldname.txt file_newname.txt<br/>
 		git commit -m "deleting 2 files, renaming 1"<br/>
 	</code>
-	<br><b>
+	<br/><b>
 Change message of last commit
 	</b><br/>
 	<code>
@@ -150,15 +150,15 @@ git commit --amend -m "New commit message"
 Push local commits to remote branch
 	</b><br/><code>
 		git push origin master<br/>
-	</code>
+	</code><br/>
 	<b>See recent commit history</b></br>
 		<code>
 			git log<br/>
-		</code>
+		</code><br/>
 		<b>See commit history for the last two commits
 		</b></br><code>
 			git log -2</br>
-		</code>
+		</code><br/>
 		<b>
 See commit history for the last two commits, with diff
 		</b><br/><code>
@@ -172,7 +172,7 @@ Revert one commit, push it
 		</b><code>
 			git revert dd61ab21<br/>
 git push origin master<br/>	
-		</code>
+		</code><br/>
 		<b>
 Revert to the moment before one commit
 		</b><br/><code>
@@ -186,22 +186,23 @@ Revert to the moment before one commit
 			<br/>
 			# Update working copy to reflect the new commit<br/>
 			git reset --hard<br/>
-		</code>
-		<b>Source:</b> http://stackoverflow.com/q/1895059/1391963
+		</code><br/>
+		<b>Source:</b> http://stackoverflow.com/q/1895059/1391963<br/><br/>
 		<b>Undo last commit, preserving local changes</b><br/>
 			<code>
 				git reset --soft HEAD~1<br/>
-			</code>
+			</code><br/>
 			<b>
 Undo last commit, without preserving local changes
 			</b><br><code>
 				git reset --hard HEAD~1<br/>
-			</code><b>
+			</code><br/><b>
 Undo last commit, preserving local changes in index
 			</b><br/>
 			<code>
 			git reset --mixed HEAD~1
 </code>
+<br/>
 <i>Or </i><code>
 git reset HEAD~1
 </code>
@@ -210,39 +211,39 @@ git reset HEAD~1
 <b>Undo non-pushed commits</b><br/>
 <code>
 	git reset origin/master<br/>
-</code>
+</code><br/>
 <b>Reset to remote state</b><br/>
 <code>
 git fetch origin<br/>
 git reset --hard origin/master</br>
-</code>
+</code><br/>
 <b>See local branches</b><br/>
 <code>
 git branch<br/>
-</code>
+</code><br/>
 <b>See all branches</b><br/>
 <code>
 git branch -a<br/>
-</code>
+</code><br/>
 <b>Make some changes, create a patch</b><br/>
 <code>
 	git diff > patch-issue-1.patch<br/>
-</code>
+</code><br/>
 <b>Add a file and create a patch</b><br/>
 <code>
 	git add newfile<br/>
 	git diff --staged > patch-issue-2.patch<br/>
-</code>
+</code><br/>
 <b>Add a file, make some changes, and create a patch<b><br/>
 
 <code>
 git add newfile<br/>
 git diff HEAD > patch-issue-2.patch<br/>
-</code>
+</code><br/>
 <b>Make a patch for a commit</b><br>
 <code>
 git format-patch COMMIT_ID<br/>
-</code>
+</code><br/>
 <b>Make patches for the last two commits</b><br/>
 <code>
 	git format-patch HEAD~2<br/>
