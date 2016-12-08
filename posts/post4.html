@@ -1,42 +1,10 @@
-<center><b>A several ways to contribute to the Linux kernel</b></center> <br/><br/>
-
-Hello all, this is my 2nd post I will talk about the Linux kernel, I will mention some importants tricks & questions every begineer <br/>
-wanna know them to start his career on the Linux kernel!<br/>
-Well, first of all let's start by asking why I need to learn this! Should I be an extra skilled ninja on C programming?<br/>
-Should I know all the commands of Linux! :O <br/>
-Haha, the answer is very simple, you don't need to be a <b>ninja</b> guy on C nor on the commands of Linux! <br/><br/>
-All what you need is the willing to learn/help/contribute ;) <br/>
-OK, let's begin then <br/>
-You need to know some <b>GIT</b>[1] commands, here is a brief of what you need mostly on this road. <br/><br/>
-<code> git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git </code> <br/><br/>
-Here what we are doing, is that we are telling git to clone us this repository to our local machine.<br/>
-Then, the next step is to go to the place where we cloned our repository and create a branch to write and compile/build our patch <br/>
-into the kernel <br/><br/>
-<code> git branch tutorial</code><br/><br/>
-OK, let's see in what branch we are, <code> git status </code> it will give you if you are in the right place <code> On branch master </code> <br/>
-Let's see the last commit which is generaly made by Linus <code> git show HEAD</code> <br/>
-So to switch to our new branch we do simply <code> git checkout tutorial </code><br/>
-Let's start looking to make a patch! There's a good tool made by Perl[2] language we can find it in scripts/checkpatch.pl <br/>
-Until now, we don't know how we can use it so let's run <code>scripts/checkpatch.pl --help</code> you can find a useful informations there. <br/>
-That script actually it search if there is some code style[3] problems and tells you kindly to fix it! :D The normal use of this tool is <br/>
-<br/><code> scripts/checkpatch.pl <b>-f</b> any_file_you_like_to_check_it </code> <br/><br/>
-It shows you something like that if the file have some things to fix. <br/><br/>
-<code>
-ERROR: REASON <br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/><br/>
-
-WARNING: REASON<br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/>
-</code><br/><br/>
-It is so easy right! Find the right place to made your patch then edit on the file you run the checkpatch tool on it. <br/>
-To edit the file, of course you need to use some console editors there's a lot of examples but I prefer VIM[3] cause it have a nice <br/>
-color syntax highlighting. It is generaly on by default when you download vim but if you don't. You should edit on your file configuration <br/>
-<code> .vimrc </code> and add <code> syntax on </code> <br/>
-Then, fix the ERROR/WARNNING/CHECK that you got it when you ran the checkpatch tool. <br/>
-After all, it is a good idea if you compile the file to see if your patch breaked the build! Even the advanced developers/contributors<br/>
-compile their patch to see if there is anything goes wrong. <br/>
-
-
-
+<title>Into the wild!</title>
+<center><b> Into the wild! </b> </center><br/><br/>
+Hi folks! I will try my best to finish and add posts in this collection. <br/>
+I think you are here and guessing about the subject/topic related to this post. Well, this a serie for couple collection about the Linux kernel <br/>
+and some low stuff! Amazing right? :P Meanwhile, I am learning and trying to post here each time! <br/>
+Alright, without any further talking here is a lit of what I posted so far until now! <br/><br/>
+<li>
+	<ul> </ul>
+	<ul> </ul>
+</li>
