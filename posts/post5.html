@@ -1,42 +1,82 @@
-<center><b>A several ways to contribute to the Linux kernel</b></center> <br/><br/>
-
-Hello all, this is my 2nd post I will talk about the Linux kernel, I will mention some importants tricks & questions every begineer <br/>
-wanna know them to start his career on the Linux kernel!<br/>
-Well, first of all let's start by asking why I need to learn this! Should I be an extra skilled ninja on C programming?<br/>
-Should I know all the commands of Linux! :O <br/>
-Haha, the answer is very simple, you don't need to be a <b>ninja</b> guy on C nor on the commands of Linux! <br/><br/>
-All what you need is the willing to learn/help/contribute ;) <br/>
-OK, let's begin then <br/>
-You need to know some <b>GIT</b>[1] commands, here is a brief of what you need mostly on this road. <br/><br/>
-<code> git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git </code> <br/><br/>
-Here what we are doing, is that we are telling git to clone us this repository to our local machine.<br/>
-Then, the next step is to go to the place where we cloned our repository and create a branch to write and compile/build our patch <br/>
-into the kernel <br/><br/>
-<code> git branch tutorial</code><br/><br/>
-OK, let's see in what branch we are, <code> git status </code> it will give you if you are in the right place <code> On branch master </code> <br/>
-Let's see the last commit which is generaly made by Linus <code> git show HEAD</code> <br/>
-So to switch to our new branch we do simply <code> git checkout tutorial </code><br/>
-Let's start looking to make a patch! There's a good tool made by Perl[2] language we can find it in scripts/checkpatch.pl <br/>
-Until now, we don't know how we can use it so let's run <code>scripts/checkpatch.pl --help</code> you can find a useful informations there. <br/>
-That script actually it search if there is some code style[3] problems and tells you kindly to fix it! :D The normal use of this tool is <br/>
-<br/><code> scripts/checkpatch.pl <b>-f</b> any_file_you_like_to_check_it </code> <br/><br/>
-It shows you something like that if the file have some things to fix. <br/><br/>
+<title>First thoughts about NASM!</title>
+<center><b> Behind the scenes!</b> </center>
+<br/><br/><br/>
+Hey guys, this is the 1st article of collection<a href="posts/post4.html"> Into the wild!</a>. I will try my best to clarify the obscure things <br/>
+about Assembly on Linux! Like any soldier going to war/battle he must indeed be ready, same case for you :P you need to download some tools <br/>
+I think it would be good to go duckduck how to install those tools, mostly we will use : <b> gcc, vim, objdump </b> <br/>
+Any other tools I will mention them in the next articles. <br/><br/>
+The name of this post is "<b>Behind the scenes</b>", keep reading and you will know why that name! <br/>
+I assume that everyone can write a simple C script printing hello world <br/>
 <code>
-ERROR: REASON <br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/><br/>
+$ vim hello.c
+<br/><br/>
+#include <stdio.h><br/>
 
-WARNING: REASON<br/>
-#LINE: FILE: PATH_OF_THE_FILE:LINE:<br/>
-+ THE LINE YOU NEED TO EDIT IT<br/>
-</code><br/><br/>
-It is so easy right! Find the right place to made your patch then edit on the file you run the checkpatch tool on it. <br/>
-To edit the file, of course you need to use some console editors there's a lot of examples but I prefer VIM[3] cause it have a nice <br/>
-color syntax highlighting. It is generaly on by default when you download vim but if you don't. You should edit on your file configuration <br/>
-<code> .vimrc </code> and add <code> syntax on </code> <br/>
-Then, fix the ERROR/WARNNING/CHECK that you got it when you ran the checkpatch tool. <br/>
-After all, it is a good idea if you compile the file to see if your patch breaked the build! Even the advanced developers/contributors<br/>
-compile their patch to see if there is anything goes wrong. <br/>
+	void main() {<br/>
+	printf("hello world!");<br/>
+	}<br/>
+</code>
+<br/>
+Until here, it is easy to write scripts/programs using high level languages.. but the question that you need to ask yourself about it <br/>
+What happen behind the scene? How the damn processor know that we want to print the sentence "hello world!"? <br/>
+I will try to answer those questions and I hope I can clarify as much as I can. <br/>
+OK, so we want to compile this little script, we use here <b>gcc</b> <code> gcc hello.c -o hello.o</code> We told here gcc to compile the script hello.c and <br/>
+we want the exectuable to be <b>hello.o</b>, the o in the end of the name stand for out<br/> 
+After that to execute it <code> ./hello.o </code> Alright, we want now to debug the program and see the assembly lines <br/>
+<br/>
+<code> $ objdump -d hello.o</code>
+<br/>
+Objdump will give you by default AT&T syntax, but we will use here the Intel syntax so, will add an argument to the Objdump command <br/>
+<br/><code> $ objdump -M intel -d hello.o
+	<br/>
+	<_start>:<br/>
+	400400:       31 ed                   xor    ebp,ebp<br/>
+	400402:       49 89 d1                mov    r9,rdx<br/>
+	400405:       5e                      pop    rsi<br/>
+	400406:       48 89 e2                mov    rdx,rsp<br/>
+	400409:       48 83 e4 f0             and    rsp,0xfffffffffffffff0<br/>
+	40040d:       50                      push   rax<br/>
+	40040e:       54                      push   rsp<br/>
+	40040f:       49 c7 c0 80 05 40 00    mov    r8,0x400580<br/>
+	400416:       48 c7 c1 10 05 40 00    mov    rcx,0x400510<br/>
+	40041d:       48 c7 c7 f6 04 40 00    mov    rdi,0x4004f6<br/>
+	400424:       ff 15 c6 0b 20 00       call   QWORD PTR [rip+0x200bc6]        # 600ff0 <_DYNAMIC+0x1d0><br/>
+	40042a:       f4                      hlt<br/>
+	40042b:       0f 1f 44 00 00          nop    DWORD PTR [rax+rax*1+0x0]<br/>
+
+		
+	<br/>
+
+</code> 
+<br/>
+I have pasted only the .text section, it is all what we need right now, but there's other sections, usually we have 2 important sections <br/>
+data section which is used for declaring constants, it does not change at runtime, the syntax for declaring data section is : <br/><br/>
+<code> section .data</code><br/><br/>
+The other important section it is what I have pasted already text section, it contains our code, we can say that it is our main function. <br/>
+That section should start with declaration : <code> global _start </code>, which will tell our sweet kernel where the program execution begins. :) <br/>
+Let's try declaring the text section : <br/> <br/>
+<code> section .text <br/>
+	global _start <br/>
+_start :
+</code> <br/><br/>
+Alright, so let's take a look on our objdump's output and let's understand it line by line! :D <br/>
+OK, so <code> xor ebp,ebp </code> we are trying here to clear the register EBP, that means we will assign 0 to our register EBP <br/>
+But wait! What is EBP in the first place!? EBP is a stack frame pointer, if you don't have any idea about what I am talking here, you can duckduck it<br/>
+or just wait until the next article. ;) <br/>
+The second line is <code> mov r9,rdx </code> and here we are moving the vaule of the rdx to r9, which are btw two registers of the x86_64 arch with Intel syntax ofcourse. <br/>
+Then, we find pop instruction which copy the data from the stack to RSI, then to add a value to the stack pointer. <br/>
+I will not goes a little deeper into the stack pointer and how it works, I will try my best to explain it in other articles. :) <br/>
+<code> and rsp,0xfffffffffffffff0 </code> and this is the stack alignment. <br/>
+and the push instruction is inserting a value onto the stack. It is very useful for passing arguments, saving registers.. <br/>
+and call it stores the location where it will return after.
+and hlt turns our CPU into HALT state (power saving mode), in other words, it is the point where the computer is ready to be turned off at that point.<br/>
+the last line <code> nop </code> in a human language it means no operation. it does nothing but it is processed by the CPU like any other instruction. <br/>
+So this means that it will be readed from memory, will increment the instruction pointer. It is very useful for debugging, e.g we can set a breakpoint there <br/>
+<br/>
+This is almost everything for the moment. If there's any clue about anything do not hesitate to let me know. I will proceed next article with writing programs <br/>
+using <b>NASM</b> and there the fun will begin! xD I hope I have clarified some things for you at least! <br/> <br/>
+
+<b>Cheers o/ </b>
 
 
 
