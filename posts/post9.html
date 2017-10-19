@@ -1,0 +1,100 @@
+<title> Learn LXD and LXC the hard way!</title>
+<center><b>Learn LXD and LXC the hard way!</b></center>
+<br/><hr>
+<br/><br/>
+Hey folks, I am starting this 2nd collection, it is about LXD,LXC and containers in general, how you can use them from a sysadmin/devops or even a developer prespectives.<br/>
+First of all, LXC is a userspace interface for the Linux kernel containment features. It lets Linux users easily create and manage system or application containers.<br/>
+While, there is LXD which is the modern container manager, it offers a user experience similar to virtual machines. You can use it <a href="https://linuxcontainers.org/lxd/try-it/">online</a>!<br/>
+I will divide the article into many parts.<br/>
+I am not going to write the usual informations about those tools, you can check this website for more informations : https://linuxcontainers.org<br/>
+
+For today, I will talk briefly about the features that enable for us containers and are needed in order to manage them.<br/>
+Containers rely on the following features which are built-in in the Linux kernel to get a contained or isolated area within the host machine. This area is closely related to a virtual machine,<br/>
+but without indeed the need for a hypervior! :D<br/>
+<ul>
+	<li> Control groups aka cgroups<br/></li>
+	<li> Namespaces </br/></li>
+	<li> Filesystem or rootfs</br></li>
+</ul>
+<br/>
+Let's talk about a little bit about each feature.<br/>
+<hr>
+<br/><b>Cgroups</b><br/>
+To understand the importance of cgroups, consider a common scenario: A process running on a system requests certain resources from the system, at a specific time, there is no available resources<br/>
+So, automatically, the kernel will decides to defer the process until there is some resources are available.. For sure, the requested resources may become available when other process release<br/>
+them.. Well, this delay in general is not acceptable, what if the process that wait for resources is an urgent process, and when it is not excuted there is some risky situations can happen.<br/>
+Besides, resources unavailablity such as our scenario can occur when a process consume all nor the majority of the resources/memory. Here, an OOM killer can be excuted at anytime.<br/>
+For that, Google presented a new generic method to solve the resource control problem with the cgroups project in 2007. Control groups allow resources to be controlled and<br/>
+accounted for based on process groups. The mainline Linux kernel first included a cgroups implementation in 2008, and this paved the way for LXC.<br/>
+And those cgroups can be configured to have specialized behavior as desired of course. <br/>
+If you wanna take a look about the cgroups you have in your system.<br/><br/>
+<code>
+$ ls -alh /sys/fs/cgroup<br/>
+total 0                  <br/>                                           
+drwxr-xr-x 13 root root 340 Oct  8 19:32 .  <br/>                        
+drwxr-xr-x  8 root root   0 Oct  8 19:32 ..         <br/>                
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 blkio         <br/>             
+lrwxrwxrwx  1 root root  11 Oct  8 19:32 cpu -> cpu,cpuacct  <br/>       
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 cpu,cpuacct        <br/>        
+lrwxrwxrwx  1 root root  11 Oct  8 19:32 cpuacct -> cpu,cpuacct  <br/>   
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 cpuset             <br/>        
+dr-xr-xr-x  6 root root   0 Oct  8 19:32 devices              <br/>      
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 freezer                  <br/>  
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 memory                     <br/>
+lrwxrwxrwx  1 root root  16 Oct  8 19:32 net_cls -> net_cls,net_prio<br/>
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 net_cls,net_prio           <br/>
+lrwxrwxrwx  1 root root  16 Oct  8 19:32 net_prio -> net_cls,net_prio  <br/>                                                                 
+dr-xr-xr-x  3 root root   0 Oct  8 19:32 perf_event            <br/>     
+dr-xr-xr-x  6 root root   0 Oct  8 19:32 pids                 <br/>      
+dr-xr-xr-x  6 root root   0 Oct  8 19:32 systemd                 <br/>   
+dr-xr-xr-x  5 root root   0 Oct  8 19:32 unified                <br/>
+</code>
+<br/>
+Let?s take a look at an example of the memory subsystem hierarchy of cgroups. It is available in the following location:
+<code>/sys/fs/cgroup/memory</code><br/>
+The memory subsystem hierarchy consists of the following files:<br/>
+<br/><code>
+$ cd sys/fs/cgroup/memory <br/>
+$ ls<br/>
+cgroup.clone_children  docker               memory.kmem.limit_in_bytes      memory.kmem.tcp.limit_in_bytes      memory.limit_in_bytes        memory.memsw.max_usage_in_bytes  memory.oom_control          memory.swappiness      release_agent<br/>
+cgroup.event_control   memory.failcnt       memory.kmem.max_usage_in_bytes  memory.kmem.tcp.max_usage_in_bytes  memory.max_usage_in_bytes    memory.memsw.usage_in_bytes      memory.pressure_level       memory.usage_in_bytes  tasks<br/>
+cgroup.procs           memory.force_empty   memory.kmem.slabinfo            memory.kmem.tcp.usage_in_bytes      memory.memsw.failcnt         memory.move_charge_at_immigrate  memory.soft_limit_in_bytes  memory.use_hierarchy<br/>
+cgroup.sane_behavior   memory.kmem.failcnt  memory.kmem.tcp.failcnt         memory.kmem.usage_in_bytes          memory.memsw.limit_in_bytes  memory.numa_stat                 memory.stat                 notify_on_release<br/>
+
+</code><br/><br/>
+Each of the files listed contains information on the control group for which it has been created. For example, the maximum memory usage in bytes is given by the <br/>
+following command (since this is the top-level hierarchy, it lists the default setting for the current host system):<br/>
+<br/><code>
+$ cat memory.max_usage_in_bytes <br/>
+51856216064<br/>
+</code><br/>
+The preceding value is in bytes; it corresponds to approximately 52GB of memory that is available for use by the currently running system. You can create your own cgroups within /sys/fs/cgroup and control each of the subsystems.<br/>
+<hr>
+<br/><b>Namespaces</b><br/>
+The concept of namespaces is quite interesting, which is provide a way to have varying views of the system for different processes. In human talking, is to have the capability to put apps in isolated environments with separate process lists,<br/>
+network devices, user lists and filesystems. Cool! Right? :D <br/>
+The most coolest part is that it is implemented inside the kernel without the need to run hypervisors or even virtualization! <br/>
+Kernel namespaces are created and manipluated using 3 basic syscalls: <br/>
+<ol>
+    <li>clone() which creates a new process and allows the child to share parts of the excution context with its parent. This low level functions sits behind the well know function fork().</li>
+    <li>unshare() which allows processes to disassociate parts of their excution context. The main use of this syscall is to modify the excution context of a process without spawning a new child process.</li>
+    <li>setns() which changes the namespace of the calling process.</li>
+</ol>
+While clone() and unshare() are standard linux syscalls, the setns() is a new addition dedicated solely to manipulate namespace membership. <br/>
+The namespace functionality has been introduced into both clone() and unshare() through a set of additional flags that indicate which namespaces are to be created for the child process (or which are to be disassociated from the caller).<br/>
+Currently, the Linux kernel implements 6 namespaces:<br/>
+mnt, pid, net, ipc, uts and user.<br/>
+Namespaces don?t have names. Instead, each gets a unique inode number at the time of its creation.<br/>
+In Linux Kernel 3.8 and higher, you can use the /proc filesystem to check in which namespace a given process resides. Simply go to /proc/<pid>/ns and you will see links for each namespace type.<br/>
+<hr>
+<br/><b>Filesystem or rootfs</b><br/>
+The next component needed for a container is the disk image, which provides the root filesystem (rootfs) for the container. The rootfs consists of a set of files, similar in structure<br/>
+to the filesystem mounted at root on any GNU/Linux-based machine. The size of rootfs is smaller than a typical OS disk image, since it does not contain the kernel. The container shares the same kernel as the host machine.<br/>
+A rootfs can further be reduced in size by making it contain just the application and configuring it to share the rootfs of the host machine. Using copy-on-write (COW) techniques,<br/>
+a single reduced read-only disk image may be shared between multiple containers.<br/>
+<br/>
+Next article will be published soon, please stay tuned.<br/>
+Please let me hear your feedback by a mail or a tweet. :)<br/>
+<b>o/</b>
+
+
