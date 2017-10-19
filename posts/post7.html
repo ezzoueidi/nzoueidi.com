@@ -1,12 +1,228 @@
+<title> <b>Examine the Stack using GDB<b></title>
+<hr>
+<br/><br/>
 Hello all, after the 1st article <a href="">Behind the scenes!</a> in our collection "Into the wild!" and after mention not once the stack<br/>
 So, this article is about undestanding the stack, why and how it works. <br/><br/>
 Without speaking much, the stack is when a program starts executing, a certain contiguous section of memory is set aside for the program called the stack. <br/>
-And this is a picture describes almost everything.<br/><br/> 
-<img src="../imgages/stack.jpeg"> <br/><br/> 
+<br/>
 In brief talking, the stack is a container of objects that are inserted and removed according to the last-in first-out (LIFO) principle.<br/>
 In the pushdown stacks only two operations are allowed: push the item into the stack, and pop the item out of the stack. <br/>
 A stack is a limited access data structure - elements can be added and removed from the stack only at the top. push adds an item to the top of the stack, pop removes the item from the top.<br/> 
 A helpful analogy is to think of a stack of books; you can remove only the top book, also you can add a new book on the top.<br/>
+<br/>
+Alright, this is a brief talking about the stack, I will not go further in that, cause there is a lot of tutorials and many many articles talking about the stack.. <br/>
+What I will talk here is how to examine the stack and debugg it. <br/>
+Let's say you have a running program, suddenly it has stopped. The first thoughts you will have to know is where/how it stopped and how it got there. <br/>
+Well, to know all of that you need to know in the first place that each time your program performs a function call, the information about where in your program the call was made from <br/>
+is saved in a block of data called a <i>stack frame</i>. The frame also contains the arguments of the call and the local variable of the function that was called. All the stack frames <br/>
+are allocated in a specific region of memory called the <i>call stack</i>.<br/>
+To debug the stack we need to have some tools, one of them and which I consider a very important tool to a developer/kernel hacker is <b>GDB</b>
+When our program stopps, we can use <b>GDB</b> as a debugger to examine the stack and see all of its informations.<br/>
+Let's say we are running our program using gdb, once it is stopped our sweet gdb will automatically select the currently excuting frame and describes it breifly as the <i>frame</i> command does. <br/>
+Keep reading to know further details about that.<br/>
+The call stack is divided up into contiguous pieces called stack frames, or frames for short; each frame is the data associated with one call to one function.<br/> 
+The frame contains the arguments given to the function, the function's local variables, and the address at which the function is executing. <br/>
+When your program is started, the stack has only one frame, that of the function main. This is called the initial frame or the outermost frame.<br/>
+Each time a function is called, a new frame is made. Each time a function returns, the frame for that function invocation is eliminated. If a function is recursive, there can be many frames for the same function.<br/>
+The frame for the function in which execution is actually occurring is called the innermost frame. This is the most recently created of all the stack frames that still exist.<br/>
+Inside your program, stack frames are identified by their addresses.<br/>
+A stack frame consists of many bytes, each of which has its own address; each kind of computer has a convention for choosing one of those bytes whose address serves as the address of the frame.<br/>
+Usually this address is kept in a register called the frame pointer register while execution is going on in that frame. <br/>
+GDB assigns numbers to all existing stack frames, starting with zero for the innermost frame, one for the frame that called it, and so on upward.<br/>
+These numbers do not really exist in your program; they are assigned by GDB to give you a way of designating stack frames in GDB commands.<br/>
+Some compilers provide a way to compile functions so that they operate without stack frames. (For example, the gcc option `-fomit-frame-pointer' generates functions without a frame.)<br/>
+This is occasionally done with heavily used library functions to save the frame setup time. GDB has limited facilities for dealing with these function invocations.<br/>
+If the innermost function invocation has no stack frame, GDB nevertheless regards it as though it had a separate frame, which is numbered zero as usual, allowing correct tracing of the function call chain.<br/>
+However, GDB has no provision for frameless functions elsewhere in the stack.<br/><br/>
+Uuh, but wait all this seems bored, I even got bored writing all of that xD. Let's do a practice showcase together.<br/>
+Let's write a simple program and debugg it so, we will understand all of the stuff menioned above!<br/>
+<code>
+	#include <stdio.h><br/><br/>
+	 
+	int add_numbers(int n1, int n2)<br/>
+	{<br/>
+		int sum=n1+n2;<br/>
+		return sum;<br/>
+	}<br/>
 
-<img src=""> <br/> <br/>
+	int main()<br/>
+	{<br/>
+		int n1=1;<br/>
+		int n2=2;<br/>
+		int sum;<br/><br/>
+						                        
+		sum=add_numbers(n1,n2);<br/>
+		printf("The sum of 1 and 2 is %d\n",sum);<br/><br/>
+								                                  
+		return 0;<br/>
+	}<br/><br/>
+</code>
+Let's compile our code ; <code> gcc -g stack_analyse.c </code><br/>
+And let's turn to our sweety GDB<br/>
+<code> gdb -q ./a.out<br/>
+Reading symbols from a.out...done.<br/>
+(gdb) disass main<br/>
+Dump of assembler code for function main:<br/>
+0x0000000000000664 <+0>:     push   %rbp<br/>
+0x0000000000000665 <+1>:     mov    %rsp,%rbp<br/>
+0x0000000000000668 <+4>:     sub    $0x10,%rsp<br/>
+0x000000000000066c <+8>:     movl   $0x1,-0xc(%rbp)<br/>
+0x0000000000000673 <+15>:    movl   $0x2,-0x8(%rbp)<br/>
+0x000000000000067a <+22>:    mov    -0x8(%rbp),%edx<br/>
+0x000000000000067d <+25>:    mov    -0xc(%rbp),%eax<br/>
+0x0000000000000680 <+28>:    mov    %edx,%esi<br/>
+0x0000000000000682 <+30>:    mov    %eax,%edi<br/>
+0x0000000000000684 <+32>:    callq  0x64a <add_numbers><br/>
+0x0000000000000689 <+37>:    mov    %eax,-0x4(%rbp)<br/>
+0x000000000000068c <+40>:    mov    -0x4(%rbp),%eax<br/>
+0x000000000000068f <+43>:    mov    %eax,%esi<br/>
+0x0000000000000691 <+45>:    lea    0x9c(%rip),%rdi        # 0x734<br/>
+0x0000000000000698 <+52>:    mov    $0x0,%eax<br/>
+0x000000000000069d <+57>:    callq  0x530 <printf@plt><br/>
+0x00000000000006a2 <+62>:    mov    $0x0,%eax<br/>
+0x00000000000006a7 <+67>:    leaveq <br/>
+0x00000000000006a8 <+68>:    retq  <br/> 
+End of assembler dump.<br/>
+(gdb) disass add_numbers <br/>
+Dump of assembler code for function add_numbers:<br/>
+0x000000000000064a <+0>:     push   %rbp<br/>
+0x000000000000064b <+1>:     mov    %rsp,%rbp<br/>
+0x000000000000064e <+4>:     mov    %edi,-0x14(%rbp)<br/>
+0x0000000000000651 <+7>:     mov    %esi,-0x18(%rbp)<br/>
+0x0000000000000654 <+10>:    mov    -0x14(%rbp),%edx<br/>
+0x0000000000000657 <+13>:    mov    -0x18(%rbp),%eax<br/>
+0x000000000000065a <+16>:    add    %edx,%eax<br/>
+0x000000000000065c <+18>:    mov    %eax,-0x4(%rbp)<br/>
+0x000000000000065f <+21>:    mov    -0x4(%rbp),%eax<br/>
+0x0000000000000662 <+24>:    pop    %rbp<br/>
+0x0000000000000663 <+25>:    retq  <br/> 
+End of assembler dump.<br/>
+(gdb) <br/>
+</code><br/>
+We have disassambled the two functions (main and add_numbers). Let's now add some breakpoints<br/>
+<code>
+(gdb) list main<br/>
+5               int sum=n1+n2;<br/>
+6               return sum;<br/>
+7       }<br/>
+8<br/>
+9       int main()<br/>
+10      {<br/>
+11              int n1=1;<br/>
+12              int n2=2;<br/>
+13              int sum;<br/>
+14   <br/>                           
+(gdb) list<br/>
+15              sum=add_numbers(n1,n2);<br/>
+16              printf("The sum of 1 and 2 is %d\n",sum);<br/>
+17                  <br/>                      
+18               return 0;<br/>
+19      }<br/>
+(gdb) break 15<br/>
+Breakpoint 1 at 0x67a: file analyse_the_stack.c, line 15.<br/>
+(gdb) break add_numbers<br/> 
+Breakpoint 2 at 0x654: file analyse_the_stack.c, line 5.<br/>
+(gdb) break 6<br/>
+Breakpoint 3 at 0x65f: file analyse_the_stack.c, line 6.<br/>
+(gdb) break 16<br/>
+Breakpoint 4 at 0x68c: file analyse_the_stack.c, line 16.<br/>
+(gdb) <br/>
+</code><br/>
+We have list our source code and have breakpointed the line 15 and that's before pushing the arguments of add_numbers() on the stack. The 2nd breakpoint is set after prolog of add_numbers().
+The prolog is: <br/>
+<code>
+0x000000000000064a <+0>:     push   %rbp<br/>
+0x000000000000064b <+1>:     mov    %rsp,%rbp<br/>
+</code><br/>
+The 3rd breakpoint was set before leaving the add_numbers(), while the 4th breakpoint set after leaving it. <br/>
+Between those two breakpoints (3 and 4) the epilog of add_numbers() is excuted. This is the epilog:<br/>
+<code>
+0x0000000000000662 <+24>:    pop    %rbp<br/>
+0x0000000000000663 <+25>:    retq  <br/> 
+</code><br/>
+Alright, let's run our program after putting those breakpoints and analyse the registers of the stack (RSP, RBP and RIP).<br/>
+To see informations about the registers, we need first to run the program <b>r</b> stands for run. Then <b> i r rsp rbp rip</b> will list for us the detailed informations about those registers.<br/>
+<code><br/>
+(gdb) r<br/>
+Starting program: /home/naeil/a.out <br/><br/>
+
+Breakpoint 1, main () at analyse_the_stack.c:15<br/>
+15              sum=add_numbers(n1,n2);<br/>
+(gdb) i r rsp rbp rip<br/>
+rsp            0x7fffffffe060   0x7fffffffe060<br/>
+rbp            0x7fffffffe070   0x7fffffffe070<br/>
+rip            0x55555555467a   0x55555555467a <main+22><br/>
+</code><br/>
+RSP is smaller than RBP because the stack grows in the direction of smaller addresses. As it can be seen in the assembly code, RIP points to pushing on the stack the second argument of add_function().<br/>
+If you noticed already or not, the next instruction after leaving add_numbers() is at the address 0x0000000000000689. This is the return code of the call function.<br/><br/>
+Let's continue to the next stage and investigate the RSP, RBP and RIP after the prolog of the add_numbers function. Moreover, let's analyse the memory starting from the top of the stack in the direction<br/>
+of the higher addresses.<br/>
+<code>
+(gdb) cont<br/>
+Continuing.<br/><br/>
+
+Breakpoint 2, add_numbers (n1=1, n2=2) at analyse_the_stack.c:5<br/>
+5               int sum=n1+n2;<br/>
+(gdb) i r rsp rbp rip<br/>
+rsp            0x7fffffffe050   0x7fffffffe050<br/>
+rbp            0x7fffffffe050   0x7fffffffe050<br/>
+rip            0x555555554654   0x555555554654 <add_numbers+10><br/>
+(gdb) x/20xw $rsp<br/>
+0x7fffffffe050: 0xffffe070      0x00007fff      0x55554689      0x00005555<br/>
+0x7fffffffe060: <i>0xffffe150      0x00000001      0x00000002      0x00000000</i><br/>
+0x7fffffffe070: 0x555546b0      0x00005555      0xf7a41f6a      0x00007fff<br/>
+0x7fffffffe080: 0x00000000      0x00000000      0xffffe158      0x00007fff<br/>
+0x7fffffffe090: 0x00040000      0x00000001      0x55554664      0x00005555<br/>
+</code><br/>
+As it can be seen the italique line is the following items pushed on the stack.<br/>
+<i>0x00000001</i> is the 1st argument of add_numbers(). <br/>
+<i>0x00000002</i> is the 2nd argument of add_numbers().<br/>
+Lastly, <i>0xffffe150</i> is the current RBP, the one from the main function.<br/>
+After pushing current RBP on the stack, RSP has been copied to RBP, which is used as a reference in add_numbers() when accessing arguments and local variable of this function (see the assembly code).
+
+RIP points to the address of the next instruction after the prolog of add_numbers().<br/>
+Let's move forward, I am trying to summarize as much as possible cause this article seems to be so damn long x)<br/>
+So, we continue in the program and we will analyze the memory before leaving add_numbers().<br/>
+<br/><code>
+(gdb) cont<br/>
+Continuing.<br/><br/>
+
+Breakpoint 3, add_numbers (n1=1, n2=2) at analyse_the_stack.c:6<br/>
+6               return sum;<br/>
+(gdb) x/20xw $rsp<br/>
+0x7fffffffe050: 0xffffe070      0x00007fff      0x55554689      <i>0x00000003</i><br/>
+0x7fffffffe060: 0xffffe150      0x00000001      0x00000002      0x00000000<br/>
+0x7fffffffe070: 0x555546b0      0x00005555      0xf7a41f6a      0x00007fff<br/>
+0x7fffffffe080: 0x00000000      0x00000000      0xffffe158      0x00007fff<br/>
+0x7fffffffe090: 0x00040000      0x00000001      0x55554664      0x00005555<br/>
+</code>
+<br/>
+In the meantime, the sum of arguments of add_numbers() has been calculated and pushed on the stack (italique).<br/>
+Let's continue running the program and analyze RSP, RBP and RIP after leaving the function add_numbers().<br/>
+<br/><code>
+(gdb) cont   <br/>     
+Continuing.<br/><br/>
+
+Breakpoint 4, main () at analyse_the_stack.c:16<br/>
+16              printf("The sum of 1 and 2 is %d\n",sum);<br/>
+(gdb) i r rsp rbp rip<br/>
+rsp            0x7fffffffe060   0x7fffffffe060<br/>
+rbp            0x7fffffffe070   0x7fffffffe070<br/>
+rip            0x55555555468c   0x55555555468c <main+40><br/>
+</code>
+<br/>
+In the meantime, the epilog of add_numbers() has been executed and the control returned to main(). <br/>
+RBP has been popped off the stack and points to the previous address (the one before calling add_numbers() ? see breakpoint 1). The return address has also been popped off the stack and the<br/> instruction at this address was executed. RIP points to the address of the next instruction. RSP points to the previous address (the one before calling add_numbers() ? see breakpoint 1).<br/>
+<br/>
+I hope you liked the article, I will try my best to write another useful aritcles, please let me know about your feedback. :)<br/><br/>
+
+<b>o/</b>
+
+
+
+
+
+
+
+
 
