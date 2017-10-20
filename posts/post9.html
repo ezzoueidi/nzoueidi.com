@@ -19,8 +19,8 @@ but without indeed the need for a hypervior! :D<br/>
 <br/>
 Let's talk about a little bit about each feature.<br/>
 <hr>
-<br/><b>Cgroups</b><br/>
-To understand the importance of cgroups, consider a common scenario: A process running on a system requests certain resources from the system, at a specific time, there is no available resources<br/>
+<br/><b><center>Cgroups</center></b><br/>
+<br/>To understand the importance of cgroups, consider a common scenario: A process running on a system requests certain resources from the system, at a specific time, there is no available resources<br/>
 So, automatically, the kernel will decides to defer the process until there is some resources are available.. For sure, the requested resources may become available when other process release<br/>
 them.. Well, this delay in general is not acceptable, what if the process that wait for resources is an urgent process, and when it is not excuted there is some risky situations can happen.<br/>
 Besides, resources unavailablity such as our scenario can occur when a process consume all nor the majority of the resources/memory. Here, an OOM killer can be excuted at anytime.<br/>
@@ -70,7 +70,7 @@ $ cat memory.max_usage_in_bytes <br/>
 </code><br/>
 The preceding value is in bytes; it corresponds to approximately 52GB of memory that is available for use by the currently running system. You can create your own cgroups within /sys/fs/cgroup and control each of the subsystems.<br/>
 <hr>
-<br/><b>Namespaces</b><br/>
+<br/><b><center>Namespaces</center></b><br/><br/>
 The concept of namespaces is quite interesting, which is provide a way to have varying views of the system for different processes. In human talking, is to have the capability to put apps in isolated environments with separate process lists,<br/>
 network devices, user lists and filesystems. Cool! Right? :D <br/>
 The most coolest part is that it is implemented inside the kernel without the need to run hypervisors or even virtualization! <br/>
@@ -87,7 +87,7 @@ mnt, pid, net, ipc, uts and user.<br/>
 Namespaces don?t have names. Instead, each gets a unique inode number at the time of its creation.<br/>
 In Linux Kernel 3.8 and higher, you can use the /proc filesystem to check in which namespace a given process resides. Simply go to /proc/<pid>/ns and you will see links for each namespace type.<br/>
 <hr>
-<br/><b>Filesystem or rootfs</b><br/>
+<br/><b><center>Filesystem or rootfs</center></b><br/><br/>
 The next component needed for a container is the disk image, which provides the root filesystem (rootfs) for the container. The rootfs consists of a set of files, similar in structure<br/>
 to the filesystem mounted at root on any GNU/Linux-based machine. The size of rootfs is smaller than a typical OS disk image, since it does not contain the kernel. The container shares the same kernel as the host machine.<br/>
 A rootfs can further be reduced in size by making it contain just the application and configuring it to share the rootfs of the host machine. Using copy-on-write (COW) techniques,<br/>
