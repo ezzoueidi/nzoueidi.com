@@ -1,0 +1,179 @@
+<title> Getting started with LXC and LXD</title>
+<center><b>Getting started with LXC and LXD </b> </center>
+<br/><hr>
+<br/>
+Hello friends, so this is the 2nd article of the collection <a href="">Learn LXD and LXC the hard way! </a><br/>.
+In this article I will not mention how to install and configure both LXC and LXD, there is many articles talking about that, just duckduck it!<br/>
+This article will show you the basic usage of LXC and LXD. So LXC is a container within a host machine as mentioned in the first article, it shares the same kernel as the host machine's kernel. <br/>
+In order to create different operating system containers we will use templates which are scripts to bootstrap a specific area of the operating system.<br/>
+LXC supports most of the distributions, so those templates are scripts dedicated to do the installation process, there is also a generic script called "download" that can install many different operating systems<br/>
+with a common interface. <br/>
+I recommend to use Ubuntu as it comes with a full support for LXC and LXD, well this is obvious the company that developed LXC/D is the same as Ubuntu, which is <a href="https://canonical.com">Canonical</a>.<br/>
+<br/>
+Alright, let's describe the lifecycle of LXC :
+<ol>
+	<ul> lxc-create : Create a container with the given OS template and options.<br/> </ul>
+	<ul> lxc-start : Very obvious, start running the container that was just created.<br/></ul>
+	<ul> lxc-attach : Get a default shell session inside the container.<br/></ul>
+	<li> Those who are familiar with Docker _as it is the most known engine of containers_ lxc-attach is the same as docker run.</br></li>
+	<ul> lxc-stop : Stop the running container. <br/></ul>
+	<ul> lxc-destroy : If the container will not longer be used, then damn destroy it x).<br/></ul>
+</ol>
+<br/>
+Let's create for example a Debian Jessie container as an example using the generic "download" template that we talked briefly about it above.<br/>
+First, we will do lxc-create to create the container with the given OS template and options provided. <br/>
+<code>
+	$ sudo lxc-create -t download -n first-container<br/><br/>
+	                                                                                                                                                                                                                  
+	Setting up the GPG keyring     <br/>                                     
+	Downloading the image index       <br/><br/>                                  
+	                                                                    
+	---                                                                 
+	DIST    RELEASE ARCH    VARIANT BUILD <br/><br/>                              
+	---                                                                 
+	alpine  3.3     amd64   default 20171102_17:50<br/>                    
+	alpine  3.5     amd64   default 20171102_17:50<br/>                   
+	alpine  3.6     amd64   default 20171102_17:50<br/>                  
+	alpine  3.6     i386    default 20171102_17:50<br/>                
+	alpine  edge    amd64   default 20171102_17:50<br/>              
+	alpine  edge    armhf   default 20170111_20:27<br/>            
+	alpine  edge    i386    default 20171102_17:50<br/>           
+	archlinux       current amd64   default 20171103_01:27<br/>          
+	archlinux       current i386    default 20171103_01:27<br/>         
+	centos  6       amd64   default 20171103_02:16<br/>         
+	centos  6       i386    default 20171103_02:16<br/>          
+	centos  7       amd64   default 20171103_02:16<br/>      
+	debian  buster  amd64   default 20171101_23:10<br/>       
+	debian  buster  arm64   default 20171103_05:45<br/>       
+	debian  buster  armel   default 20171101_23:10<br/>         
+	debian  buster  i386    default 20171101_23:10<br/>         
+	debian  buster  ppc64el default 20171103_05:45<br/>          
+	debian  buster  s390x   default 20171103_05:45<br/>           
+	debian  jessie  amd64   default 20171101_23:10<br/>       
+	debian  jessie  arm64   default 20171103_05:45<br/>       
+	debian  jessie  armel   default 20171101_12:57<br/>     
+	debian  jessie  armhf   default 20171101_23:10<br/>   
+	debian  jessie  i386    default 20171101_23:10<br/>   
+	debian  jessie  powerpc default 20171024_22:42<br/>   
+	debian  jessie  ppc64el default 20171103_05:45<br/>    
+	debian  jessie  s390x   default 20171103_05:45<br/>    
+	debian  sid     amd64   default 20171101_23:10<br/>     
+	debian  sid     arm64   default 20171103_05:45<br/>      
+	debian  sid     armel   default 20171031_15:52<br/>      
+	debian  sid     armhf   default 20171026_22:42<br/>      
+	debian  sid     i386    default 20171101_23:10<br/>      
+	debian  sid     powerpc default 20171025_22:42<br/>    
+	debian  sid     ppc64el default 20171103_05:45<br/>      
+	debian  sid     s390x   default 20171103_05:45<br/>       
+	debian  stretch arm64   default 20171103_05:45<br/>                                                                                          
+	debian  stretch armel   default 20171101_23:10<br/>                            
+	debian  stretch powerpc default 20161104_22:42<br/>                                                                                                                                     
+	---<br/>
+	Distribution: debian<br/>
+	Release: jessie<br/>
+	Architecture: amd64<br/><br/>
+
+	Downloading the image index<br/>
+	Downloading the rootfs<br/>
+	Downloading the metadata<br/>
+	The image cache is now ready<br/>
+	Unpacking the rootfs<br/><br/>
+
+	---<br/>
+	You just created a Debian container (release=jessie, arch=amd64, variant=default)<br/><br/>
+
+	To enable sshd, run: apt-get install openssh-server<br/><br/>
+
+	For security reason, container images ship without user accounts<br/>
+	and without a root password.<br/><br/>
+
+	Use lxc-attach or chroot directly into the rootfs to set a root password<br/>
+	or create user accounts.<br/>
+
+</code>
+<br/><br/>
+\o/ We just finished creating our first container using LXC, and we named it first-container. As you can see it is Debian Jessie with AMD64 as architecture, you can notice too that there is no user<br/>
+accounts nor root password set up in the container. As mentioned in the end of the output of the command <i>lxc-create</i>, you can use <i>lxc-attach</i> to start a sheel session to make the changes you like.<br/>
+By default the <i>lxc-create</i> command creates the container in the directory <i>/var/lib/lxc{container-name}</i>. So our container already created will be in <i>/var/lib/lxc/first-container</i>.<br/>
+If we take a look we will find it approximately like that. <br/><br/>
+<code>
+$ sudo ls -alh /var/lib/lxc/first_container<br/><br/>
+
+total 16K<br/>
+drwxrwx---  3 root root 4.0K Nov  3 12:14 .<br/>
+drwxr-xr-x  4 root root 4.0K Nov  3 12:12 ..<br/>
+-rw-r--r--  1 root root  698 Nov  3 12:14 config<br/>
+drwxr-xr-x 22 root root 4.0K Nov  2 00:14 rootfs<br/>
+$ sudo ls -alh /var/lib/lxc/first_container/rootfs<br/>
+<br/>
+total 88K<br/>
+drwxr-xr-x 22 root root 4.0K Nov  2 00:14 .<br/>
+drwxrwx---  3 root root 4.0K Nov  3 12:14 ..<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 bin<br/>
+drwxr-xr-x  2 root root 4.0K Jul 13 14:01 boot<br/>
+drwxr-xr-x  4 root root 4.0K Nov  2 00:14 dev<br/>
+drwxr-xr-x 44 root root 4.0K Nov  3 12:14 etc<br/>
+drwxr-xr-x  2 root root 4.0K Jul 13 14:01 home<br/>
+drwxr-xr-x 10 root root 4.0K Nov  2 00:14 lib<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 lib64<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 media<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 mnt<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 opt<br/>
+drwxr-xr-x  2 root root 4.0K Jul 13 14:01 proc<br/>
+drwx------  2 root root 4.0K Nov  2 00:14 root<br/>
+drwxr-xr-x  4 root root 4.0K Nov  2 00:14 run<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 sbin<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 selinux<br/>
+drwxr-xr-x  2 root root 4.0K Nov  2 00:14 srv<br/>
+drwxr-xr-x  2 root root 4.0K Apr  6  2015 sys<br/>
+drwxrwxrwt  2 root root 4.0K Nov  2 00:15 tmp<br/>
+drwxr-xr-x 10 root root 4.0K Nov  2 00:14 usr<br/>
+drwxr-xr-x 11 root root 4.0K Nov  2 00:14 var<br/>
+<br/>
+</code>
+The configuration specific to this container exists in <i>/var/lib/lxc/first-container/config</i>, the contents of which are shown here: <br/>
+<code>
+$ cat /var/lib/lxc/first_container/config<br/><br/>                                                                                                                                                                                                                     
+
+# Template used to create this container: /usr/share/lxc/templates/lxc-download<br/>
+# Parameters passed to the template:<br/>
+# Template script checksum (SHA-1): b7de1d7259bdd66f5b8f0347f74b18c19729883a<br/>
+# For additional config options, please look at lxc.container.conf(5)<br/><br/>
+
+# Uncomment the following line to support nesting containers:<br/>
+#lxc.include = /usr/share/lxc/config/nesting.conf<br/>
+# (Be aware this has security implications)<br/><br/><br/>
+
+
+# Distribution configuration<br/>
+lxc.include = /usr/share/lxc/config/debian.common.conf<br/>
+lxc.arch = x86_64<br/><br/>
+
+# Container specific configuration<br/>
+lxc.rootfs.path = dir:/var/lib/lxc/first_container/rootfs<br/>
+lxc.uts.name = first_container<br/><br/>
+
+# Network configuration<br/>
+lxc.net.0.type = empty<br/><br/>
+</code>
+The default container creation path can be overridden using the -P option as shown here, which will create the container in <i>/tmp</i> for example:<br/><br/>
+<code>
+$ sudo lxc-create -P /tmp/ -t download -n first-container<br/>
+</code>
+<br/>
+Alright, let's move forward to the next steps, after creating our container, we might think to start it, so we will use <i>lxc-start</i>.<br/>
+<code>
+$ sudo lxc-start -d -n first-container<br/>
+</code>
+<br/>
+<i> -d </i> is the default mode, it not necessary to specify it, we can otherwise start our container in a foreground mode by using <i>-F</i> instead of the default mode.<br/>
+To see our containers just type <i>lxc-ls</i>. Alright, so let's attach our created container by <i> lxc-attach -n first-container</i> and then we can use our container <br/>
+Just for the records, you can show your containers in a fancy way using the argument <i>--fancy</i> : <i>lxc-ls --fancy</i><br/>
+Then, when we are done with our work with the container, we can stop the container. Stopping the container is equivalent to powering down a machine;<br/>
+we can start the container again any time in the future. Again, it is necessary to use the -n option to provide the name of the container when using lxc-stop: <br/>
+<i> lxc-stop -n first-container</i><br/>
+Otherwise, when we don't need the container anymore, we can simply delete it permanently from the host system using <i>lxc-destroy</i>: <i>lxc-destroy -n first-container</i><br/>
+<br/>
+This is it, for our second article, in the next one which I will try my best to publish ASAP, we will talk about the OS templates and how we can use them. <br/>
+Until then, I hope you enjoyed reading this article, please let me know if there is any typos or anything you wanna say it by mailing me at <b>naeil[AT]nzoueidi[DOT]com</b> or by <a href="https://twitter.com/NaeilZoueidi">tweeting</a> me.<br/><br/>
+Cheers <b>o/<b>
