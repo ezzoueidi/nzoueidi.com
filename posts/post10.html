@@ -11,13 +11,13 @@ with a common interface. <br/>
 I recommend to use Ubuntu as it comes with a full support for LXC and LXD, well this is obvious the company that developed LXC/D is the same as Ubuntu, which is <a href="https://canonical.com">Canonical</a>.<br/>
 <br/>
 Alright, let's describe the lifecycle of LXC :
-<ul>
-	<ol> lxc-create : Create a container with the given OS template and options.<br/> </ol>
-	<ol> lxc-start : Very obvious, start running the container that was just created.<br/></ol>
-	<ol> lxc-attach : Get a default shell session inside the container.<br/></ol>
-	<ul> Those who are familiar with Docker _as it is the most known engine of containers_ lxc-attach is the same as docker run.</br></ul>
-	<ol> lxc-stop : Stop the running container. <br/></ol>
-	<ol> lxc-destroy : If the container will not longer be used, then damn destroy it x).<br/></ol>
+<ol>
+	<ul> lxc-create : Create a container with the given OS template and options.<br/> </ul>
+	<ul> lxc-start : Very obvious, start running the container that was just created.<br/></ul>
+	<ul> lxc-attach : Get a default shell session inside the container.<br/></ul>
+	<ol> Those who are familiar with Docker _as it is the most known engine of containers_ lxc-attach is the same as docker run.</br></ol>
+	<ul> lxc-stop : Stop the running container. <br/></ul>
+	<ul> lxc-destroy : If the container will not longer be used, then damn destroy it x).<br/></ul>
 </ol>
 <br/>
 Let's create for example a Debian Jessie container as an example using the generic "download" template that we talked briefly about it above.<br/>
