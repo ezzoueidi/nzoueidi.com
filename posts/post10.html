@@ -2,7 +2,7 @@
 <center><b>Getting started with LXC and LXD </b> </center>
 <br/><hr>
 <br/>
-Hello friends, so this is the 2nd article of the collection <a href="">Learn LXD and LXC the hard way! </a><br/>.
+Hello friends, so this is the 2nd article of the collection <a href="http://nzoueidi.com/posts/post9.html">Learn LXD and LXC the hard way! </a><br/>
 In this article I will not mention how to install and configure both LXC and LXD, there is many articles talking about that, just duckduck it!<br/>
 This article will show you the basic usage of LXC and LXD. So LXC is a container within a host machine as mentioned in the first article, it shares the same kernel as the host machine's kernel. <br/>
 In order to create different operating system containers we will use templates which are scripts to bootstrap a specific area of the operating system.<br/>
@@ -11,17 +11,17 @@ with a common interface. <br/>
 I recommend to use Ubuntu as it comes with a full support for LXC and LXD, well this is obvious the company that developed LXC/D is the same as Ubuntu, which is <a href="https://canonical.com">Canonical</a>.<br/>
 <br/>
 Alright, let's describe the lifecycle of LXC :
-<ol>
-	<ul> lxc-create : Create a container with the given OS template and options.<br/> </ul>
-	<ul> lxc-start : Very obvious, start running the container that was just created.<br/></ul>
-	<ul> lxc-attach : Get a default shell session inside the container.<br/></ul>
-	<li> Those who are familiar with Docker _as it is the most known engine of containers_ lxc-attach is the same as docker run.</br></li>
-	<ul> lxc-stop : Stop the running container. <br/></ul>
-	<ul> lxc-destroy : If the container will not longer be used, then damn destroy it x).<br/></ul>
+<ul>
+	<ol> lxc-create : Create a container with the given OS template and options.<br/> </ol>
+	<ol> lxc-start : Very obvious, start running the container that was just created.<br/></ol>
+	<ol> lxc-attach : Get a default shell session inside the container.<br/></ol>
+	<ul> Those who are familiar with Docker _as it is the most known engine of containers_ lxc-attach is the same as docker run.</br></ul>
+	<ol> lxc-stop : Stop the running container. <br/></ol>
+	<ol> lxc-destroy : If the container will not longer be used, then damn destroy it x).<br/></ol>
 </ol>
 <br/>
 Let's create for example a Debian Jessie container as an example using the generic "download" template that we talked briefly about it above.<br/>
-First, we will do lxc-create to create the container with the given OS template and options provided. <br/>
+First, we will do lxc-create to create the container with the given OS template and options provided. <br/><br/>
 <code>
 	$ sudo lxc-create -t download -n first-container<br/><br/>
 	                                                                                                                                                                                                                  
@@ -131,7 +131,7 @@ drwxr-xr-x 10 root root 4.0K Nov  2 00:14 usr<br/>
 drwxr-xr-x 11 root root 4.0K Nov  2 00:14 var<br/>
 <br/>
 </code>
-The configuration specific to this container exists in <i>/var/lib/lxc/first-container/config</i>, the contents of which are shown here: <br/>
+The configuration specific to this container exists in <i>/var/lib/lxc/first-container/config</i>, the contents of which are shown here: <br/><br/>
 <code>
 $ cat /var/lib/lxc/first_container/config<br/><br/>                                                                                                                                                                                                                     
 
@@ -161,7 +161,7 @@ The default container creation path can be overridden using the -P option as sho
 $ sudo lxc-create -P /tmp/ -t download -n first-container<br/>
 </code>
 <br/>
-Alright, let's move forward to the next steps, after creating our container, we might think to start it, so we will use <i>lxc-start</i>.<br/>
+Alright, let's move forward to the next steps, after creating our container, we might think to start it, so we will use <i>lxc-start</i>.<br/><br/>
 <code>
 $ sudo lxc-start -d -n first-container<br/>
 </code>
