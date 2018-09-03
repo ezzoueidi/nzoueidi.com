@@ -106,7 +106,7 @@ I took this piece of code from create.go file to demonstrate the implementation 
 The function associated to this starts from the line <b>92</b> and ends at the line <b>111</b><br/>
 You can notice there that kubernetes commands are implemented using the <a href="https://github.com/spf13/cobra">Cobra command framework</a>. Cobra provides a lot of great features for building CLI. <br/>
 As you can see here<br/><br/>
-<code>
+<pre>   <code>     p { color: red; }     body { background-color: #eee; }   
          cmd := &cobra.Command{<br/>
                  Use: "create -f FILENAME",<br/>
                  DisableFlagsInUseLine: true,<br/>
@@ -124,8 +124,7 @@ As you can see here<br/><br/>
                          cmdutil.CheckErr(o.RunCreate(f, cmd))<br/>
                  },<br/>
          }<br/>
-</code>
-<br/>
+</code></pre><br/>
 Cobra makes it very easy to locate which file implements each command line option. It gives also the ability to put the command <b>usage</b> alongside a brief description of what the command can do.<br/>
 While this is implemented in every piece of kuberenetes. So, you can walk through all kubectl commands and you can read their descriptions which will make you jump to the piece of code you need.<br/>
 Seems clear until now right?<br/> Okay, here is the magic! :D <br/>
