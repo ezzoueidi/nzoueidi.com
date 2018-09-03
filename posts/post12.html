@@ -1,5 +1,5 @@
-<title> The magic behind a simple kubectl command!</title>
-<center><b>The magic behind a simple kubectl command! </b> </center>
+<title> The magic behind a simple kubectl command! -- Part1</title>
+<center><b>The magic behind a simple kubectl command! -- Part1</b> </center>
 <br/><hr>
 <br/>
 Hey folks, as promised this is the first article in the k8s code's collection.<br/>
@@ -8,26 +8,26 @@ First, we need to clone the k8s repository, of course am assuming that you have 
 <code> go get -d k8s.io/kubernetes </code><br/>
 Once this done, you will see the structure of k8s's repository<br/>
 <pre><code>
-Godeps/ <br/>
-api/ <br/>
-build/ <br/>
-cluster/ <br/>
-cmd/ <br/>
-docs/ <br/>
-hack/ <br/>
-logo/ <br/>
-pkg/ <br/>
-plugin/ <br/>
-staging/ <br/>
-test/ <br/>
-third_party/ <br/>
-translations/ <br/>
-vendor/ <br/>
+Godeps/ 
+api/ 
+build/ 
+cluster/ 
+cmd/ 
+docs/ 
+hack/ 
+logo/ 
+pkg/ 
+plugin/ 
+staging/ 
+test/ 
+third_party/ 
+translations/ 
+vendor/ 
 </code></pre><br/>
 For now, while we are talking about <i>kubectl</i>, we will be interested by <b>pkg/</b> folder. There we can find some sub-directories and files. <br/>
 <pre><code>
-pi   auth   capabilities  cloudprovider  credentialprovider  fieldpath  kubeapiserver  kubelet   master  printers  proxy  registry  scheduler  securitycontext  ssh   version  watch <br/>
-apis  BUILD  client        controller     features            generated  kubectl        kubemark  OWNERS  probe     quota  routes    security   serviceaccount   util  volume   windows<br/>
+pi   auth   capabilities  cloudprovider  credentialprovider  fieldpath  kubeapiserver  kubelet   master  printers  proxy  registry  scheduler  securitycontext  ssh   version  watch 
+apis  BUILD  client        controller     features            generated  kubectl        kubemark  OWNERS  probe     quota  routes    security   serviceaccount   util  volume   windows
 </code></pre>
 <br/>
 As you can see, we have the folder <b>kubectl</b>. The folder in there which is <b>cmd</b> is the entry point for all kubectl commands.<br/>
@@ -38,68 +38,68 @@ There is always more than one way to do that. You can dump or display informatio
 or just go and read the documentation and have a quick look on the sub-directories in <b>pkg/kubectl/cmd/</b> and you will notice that there is a folder with <b>create</b> as a name.<br/>
 Let's open the go file <i>pkg/kubectl/cmd/create/create.go</i> which is associated to the kubectl create command including every possible argument.<br/>
 <pre><code>
- 81 func NewCreateOptions(ioStreams genericclioptions.IOStreams) *CreateOptions { <br/>
- 82         return &CreateOptions{ <br/>
- 83                 PrintFlags:  genericclioptions.NewPrintFlags("created").WithTypeSetter(scheme.Scheme),<br/>
- 84                 RecordFlags: genericclioptions.NewRecordFlags(),<br/>
- 85<br/>
- 86                 Recorder: genericclioptions.NoopRecorder{},<br/>
- 87<br/>
- 88                 IOStreams: ioStreams,<br/>
- 89         }<br/>
- 90 }<br/>
- 91<br/>
- <b>92</b> func NewCmdCreate(f cmdutil.Factory, ioStreams genericclioptions.IOStreams) *cobra.Command {<br/>
- 93         o := NewCreateOptions(ioStreams)<br/>
- 94<br/>
- 95         cmd := &cobra.Command{<br/>
- 96                 Use: "create -f FILENAME",<br/>
- 97                 DisableFlagsInUseLine: true,<br/>
- 98                 Short:   i18n.T("Create a resource from a file or from stdin."),<br/>
- 99                 Long:    createLong,<br/>
-100                 Example: createExample,<br/>
-101                 Run: func(cmd *cobra.Command, args []string) {<br/>
-102                         if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames) {<br/>
-103                                 defaultRunFunc := cmdutil.DefaultSubCommandRun(ioStreams.ErrOut)<br/>
-104                                 defaultRunFunc(cmd, args)<br/>
-105                                 return<br/>
-106                         }<br/>
-107                         cmdutil.CheckErr(o.Complete(f, cmd))<br/>
-108                         cmdutil.CheckErr(o.ValidateArgs(cmd, args))<br/>
-109                         cmdutil.CheckErr(o.RunCreate(f, cmd))<br/>
-110                 },<br/>
-<b>111</b>         }<br/>
-112<br/>
-113         // bind flag structs<br/>
-114         o.RecordFlags.AddFlags(cmd)<br/>
-115<br/>
-116         usage := "to use to create the resource"<br/>
-117         cmdutil.AddFilenameOptionFlags(cmd, &o.FilenameOptions, usage)<br/>
-118         cmd.MarkFlagRequired("filename")<br/>
-119         cmdutil.AddValidateFlags(cmd)<br/>
-120         cmd.Flags().BoolVar(&o.EditBeforeCreate, "edit", o.EditBeforeCreate, "Edit the API resource before creating")<br/>
-121         cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",<br/>
-122                 "Only relevant if --edit=true. Defaults to the line ending native to your platform.")<br/>
-123         cmdutil.AddApplyAnnotationFlags(cmd)<br/>
-124         cmdutil.AddDryRunFlag(cmd)<br/>
-125         cmd.Flags().StringVarP(&o.Selector, "selector", "l", o.Selector, "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")<br>
-126         cmd.Flags().StringVar(&o.Raw, "raw", o.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")<br/>
-127<br/>
-128         o.PrintFlags.AddFlags(cmd)<br/>
-129<br/>
-130         // create subcommands<br/>
-131         cmd.AddCommand(NewCmdCreateNamespace(f, ioStreams))<br/>
-132         cmd.AddCommand(NewCmdCreateQuota(f, ioStreams))<br/>
-133         cmd.AddCommand(NewCmdCreateSecret(f, ioStreams))<br/>
-134         cmd.AddCommand(NewCmdCreateConfigMap(f, ioStreams))<br/>
-135         cmd.AddCommand(NewCmdCreateServiceAccount(f, ioStreams))<br/>
-136         cmd.AddCommand(NewCmdCreateService(f, ioStreams))<br/>
-137         cmd.AddCommand(NewCmdCreateDeployment(f, ioStreams))<br/>
-138         cmd.AddCommand(NewCmdCreateClusterRole(f, ioStreams))<br/>
-139         cmd.AddCommand(NewCmdCreateClusterRoleBinding(f, ioStreams))<br/>
-140         cmd.AddCommand(NewCmdCreateRole(f, ioStreams))<br/>
-141         cmd.AddCommand(NewCmdCreateRoleBinding(f, ioStreams))<br/>
-142         cmd.AddCommand(NewCmdCreatePodDisruptionBudget(f, ioStreams))<br/>
+ 81 func NewCreateOptions(ioStreams genericclioptions.IOStreams) *CreateOptions { 
+ 82         return &CreateOptions{ 
+ 83                 PrintFlags:  genericclioptions.NewPrintFlags("created").WithTypeSetter(scheme.Scheme),
+ 84                 RecordFlags: genericclioptions.NewRecordFlags(),
+ 85
+ 86                 Recorder: genericclioptions.NoopRecorder{},
+ 87
+ 88                 IOStreams: ioStreams,
+ 89         }
+ 90 }
+ 91
+ <b>92</b> func NewCmdCreate(f cmdutil.Factory, ioStreams genericclioptions.IOStreams) *cobra.Command {
+ 93         o := NewCreateOptions(ioStreams)
+ 94
+ 95         cmd := &cobra.Command{
+ 96                 Use: "create -f FILENAME",
+ 97                 DisableFlagsInUseLine: true,
+ 98                 Short:   i18n.T("Create a resource from a file or from stdin."),
+ 99                 Long:    createLong,
+100                 Example: createExample,
+101                 Run: func(cmd *cobra.Command, args []string) {
+102                         if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames) {
+103                                 defaultRunFunc := cmdutil.DefaultSubCommandRun(ioStreams.ErrOut)
+104                                 defaultRunFunc(cmd, args)
+105                                 return
+106                         }
+107                         cmdutil.CheckErr(o.Complete(f, cmd))
+108                         cmdutil.CheckErr(o.ValidateArgs(cmd, args))
+109                         cmdutil.CheckErr(o.RunCreate(f, cmd))
+110                 },
+<b>111</b>         }
+112
+113         // bind flag structs
+114         o.RecordFlags.AddFlags(cmd)
+115
+116         usage := "to use to create the resource"
+117         cmdutil.AddFilenameOptionFlags(cmd, &o.FilenameOptions, usage)
+118         cmd.MarkFlagRequired("filename")
+119         cmdutil.AddValidateFlags(cmd)
+120         cmd.Flags().BoolVar(&o.EditBeforeCreate, "edit", o.EditBeforeCreate, "Edit the API resource before creating")
+121         cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",
+122                 "Only relevant if --edit=true. Defaults to the line ending native to your platform.")
+123         cmdutil.AddApplyAnnotationFlags(cmd)
+124         cmdutil.AddDryRunFlag(cmd)
+125         cmd.Flags().StringVarP(&o.Selector, "selector", "l", o.Selector, "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
+126         cmd.Flags().StringVar(&o.Raw, "raw", o.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
+127
+128         o.PrintFlags.AddFlags(cmd)
+129
+130         // create subcommands
+131         cmd.AddCommand(NewCmdCreateNamespace(f, ioStreams))
+132         cmd.AddCommand(NewCmdCreateQuota(f, ioStreams))
+133         cmd.AddCommand(NewCmdCreateSecret(f, ioStreams))
+134         cmd.AddCommand(NewCmdCreateConfigMap(f, ioStreams))
+135         cmd.AddCommand(NewCmdCreateServiceAccount(f, ioStreams))
+136         cmd.AddCommand(NewCmdCreateService(f, ioStreams))
+137         cmd.AddCommand(NewCmdCreateDeployment(f, ioStreams))
+138         cmd.AddCommand(NewCmdCreateClusterRole(f, ioStreams))
+139         cmd.AddCommand(NewCmdCreateClusterRoleBinding(f, ioStreams))
+140         cmd.AddCommand(NewCmdCreateRole(f, ioStreams))
+141         cmd.AddCommand(NewCmdCreateRoleBinding(f, ioStreams))
+142         cmd.AddCommand(NewCmdCreatePodDisruptionBudget(f, ioStreams))
 </code></pre>
 <br/>
 I took this piece of code from create.go file to demonstrate the implementation of the command <b>kubectl create -f file</b> at the runtime. <br/> 
@@ -107,28 +107,35 @@ The function associated to this starts from the line <b>92</b> and ends at the l
 You can notice there that kubernetes commands are implemented using the <a href="https://github.com/spf13/cobra">Cobra command framework</a>. Cobra provides a lot of great features for building CLI. <br/>
 As you can see here<br/><br/>
 <pre>   <code>     
-         cmd := &cobra.Command{<br/>
-                 Use: "create -f FILENAME",<br/>
-                 DisableFlagsInUseLine: true,<br/>
-                 Short:   i18n.T("Create a resource from a file or from stdin."),<br/>
-                 Long:    createLong,<br/>
-                 Example: createExample,<br/>
-                 Run: func(cmd *cobra.Command, args []string) {<br/>
-                         if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames) {<br/>
-                                 defaultRunFunc := cmdutil.DefaultSubCommandRun(ioStreams.ErrOut)<br/>
-                                 defaultRunFunc(cmd, args)<br/>
-                                 return<br/>
-                         }<br/>
-                         cmdutil.CheckErr(o.Complete(f, cmd))<br/>
-                         cmdutil.CheckErr(o.ValidateArgs(cmd, args))<br/>
-                         cmdutil.CheckErr(o.RunCreate(f, cmd))<br/>
-                 },<br/>
-         }<br/>
+         cmd := &cobra.Command{
+                 Use: "create -f FILENAME",
+                 DisableFlagsInUseLine: true,
+                 Short:   i18n.T("Create a resource from a file or from stdin."),
+                 Long:    createLong,
+                 Example: createExample,
+                 Run: func(cmd *cobra.Command, args []string) {
+                         if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames) {
+                                 defaultRunFunc := cmdutil.DefaultSubCommandRun(ioStreams.ErrOut)
+                                 defaultRunFunc(cmd, args)
+                                 return
+                         }
+                         cmdutil.CheckErr(o.Complete(f, cmd))
+                         cmdutil.CheckErr(o.ValidateArgs(cmd, args))
+                         cmdutil.CheckErr(o.RunCreate(f, cmd))
+                 },
+         }
 </code></pre><br/>
 Cobra makes it very easy to locate which file implements each command line option. It gives also the ability to put the command <b>usage</b> alongside a brief description of what the command can do.<br/>
 While this is implemented in every piece of kuberenetes. So, you can walk through all kubectl commands and you can read their descriptions which will make you jump to the piece of code you need.<br/>
 As shown in lines 96-101 in the snippet of code, the strings Use, Short, Long, and Example all hold information describing the command and Run points to a function that actually runs the command.<br/>
-The RunCreate function invoked on line 109 is where the bulk of the kubectl create command is implemented. The implementation of this function can be found in the same file <b>create.go</b><br/>
+We can also see that there are three functions in order to run the command <b>kubectl create -f FILENAME</b>.
+These are the following funcs:<br/>
+<ul>
+   <li> func Complete </li>
+   <li> func ValidateArgs</li>
+   <li> func RunCreate</li>
+</ul> 
+The RunCreate function is the most important one, it is invoked on line 109 where the bulk of the kubectl create command is implemented. The implementation of this function can be found in the same file <b>create.go</b><br/>
 <pre>
 <code>
 205 func (o *CreateOptions) RunCreate(f cmdutil.Factory, cmd *cobra.Command) error {
@@ -198,11 +205,146 @@ The RunCreate function invoked on line 109 is where the bulk of the kubectl crea
 269 }
 </code>
 </pre>
+As you can see into the RunCreate func, there is the builder mechanism which is implemented in many piece of kubernetes. It is a little bit tricky for any newcomer to the kubernetes code or to golang in general.<br/>
+So, <i>f.NewBuilder</i> will take arguments and parameters from the command line and converts them into a list of resources. That's in a brief description of what NewBuilder do.<br/>
+Besides, it's also responsible for creating a visitor construct that can be used to iterate across all the resources. <br/>
+The code is complex because it uses a variant of the builder pattern where individual functions are each doing a separate portion of the data initialization.<br/>
+The functions <b>Unstructed</b>, <b>Schema</b>, <b>ContinueOnError</b>, <b>NamespaceParam</b>, <b>DefaultNamespace</b>, <b>FilenameParam</b>, <b>SelectorParam</b> and <b>Flatten</b> all take in a pointer to a Builder struct, perform some form of modification <br/>
+on the Builder struct, and then return the pointer to the Builder struct for the next method in the chain to use when it performs its modifications. <br/>
+All of these methods are basically implemented in another go file. You can find it under <i>staging/src/k8s.io/cli-runtime/pkg/genericclioptions/resource/builder.go</i><br/>
+<pre>
+<code>
+func (b *Builder) <b>Schema(schema ContentValidator)</b> *Builder {
+       b.schema = schema
+       return b
+}<br/>
+func (b *Builder) <b>ContinueOnError()</b> *Builder {
+       b.continueOnError = true
+       return b
+}<br/>
+func (b *Builder) <b>NamespaceParam(namespace string)</b> *Builder {
+       b.namespace = namespace
+       return b
+}<br/>
+func (b *Builder) <b>FilenameParam(enforceNamespace bool, filenameOptions *FilenameOptions)</b> *Builder {
+       recursive := filenameOptions.Recursive
+       paths := filenameOptions.Filenames
+       for _, s := range paths {
+               switch {
+               case s == "-":
+                       b.Stdin()
+               case strings.Index(s, "http://") == 0 || strings.Index(s, "https://") == 0:
+                       url, err := url.Parse(s)
+                       if err != nil {
+                               b.errs = append(b.errs, fmt.Errorf("the URL passed to filename %q is not valid: %v", s, err))
+                               continue
+                       }
+                       b.URL(defaultHttpGetAttempts, url)
+               default:
+                       if !recursive {
+                               b.singleItemImplied = true
+                       }
+                       b.Path(recursive, s)
+               }
+       }
+
+       if enforceNamespace {
+               b.RequireNamespace()
+       }
+
+       return b
+}
 <br/>
+func (b *Builder) <b>LabelSelectorParam(s string)</b> *Builder {
+       selector := strings.TrimSpace(s)
+       if len(selector) == 0 {
+               return b
+       }
+       if b.selectAll {
+               b.errs = append(b.errs, fmt.Errorf("found non-empty label selector %q with previously set 'all' parameter. ", s))
+               return b
+       }
+       return b.LabelSelector(selector)
+}
 <br/>
+func (b *Builder) <b>Flatten()</b> *Builder {
+       b.flatten = true
+       return b
+}
+</code>
+</pre>
+Once all the initializers have completed the <b>f.NewBuilder</b> func calls the <b>Do</b> func. <br/>
+Which will returs a Result object that will be used to drive and begin the creaton of our resource.<br/>
+Here where it comes the concept of <i>Visitor</i> which is also an object will make it through the list of resources that were associated with this invocation of f.NewBuilder.<br/>
+This is the implementation of the Do func:<br/>
+<pre>
+<code>
+func (b *Builder) <b>Do()</b> *Result {
+       r := b.visitorResult()
+       r.mapper = b.Mapper()
+       if r.err != nil {
+               return r
+       }
+       if b.flatten {
+               r.visitor = NewFlattenListVisitor(r.visitor, b.objectTyper, b.mapper)
+       }
+       helpers := []VisitorFunc{}
+       if b.defaultNamespace {
+               helpers = append(helpers, SetNamespace(b.namespace))
+       }
+       if b.requireNamespace {
+               helpers = append(helpers, RequireNamespace(b.namespace))
+       }
+       helpers = append(helpers, FilterNamespace)
+       if b.requireObject {
+               helpers = append(helpers, RetrieveLazy)
+       }
+       r.visitor = NewDecoratedVisitor(r.visitor, helpers...)
+       if b.continueOnError {
+               r.visitor = ContinueOnErrorVisitor{r.visitor}
+       }
+       return r
+}
+</code>
+</pre>
+the <b>NewDecoratedVisitor</b> is created and stored as part of the Result object that is returned by the Builder <b>Do</b> func.<br/>
+The <b>DecoratedVisitor</b> has a <b>Vist</b> func that will call the <b>Visitor</b> func which is passed already into it.<br/>
+As usual, this is the implementation of the <b>NewDecoratedVisitor</b> func:
+<pre>
+<code>
+// NewDecoratedVisitor will create a visitor that invokes the provided visitor functions before
+// the user supplied visitor function is invoked, giving them the opportunity to mutate the Info
+// object or terminate early with an error.
+func <b>NewDecoratedVisitor(v Visitor, fn ...VisitorFunc)</b> Visitor {
+        if len(fn) == 0 {
+                return v
+        }
+        return DecoratedVisitor{v, fn}
+}
+
+// Visit implements Visitor
+func (v DecoratedVisitor) <b>Visit(fn VisitorFunc)</b> error {
+        return v.visitor.Visit(func(info *Info, err error) error {
+                if err != nil {
+                        return err
+                }
+                for i := range v.decorators {
+                        if err := v.decorators[i](info, nil); err != nil {
+                                return err
+                        }
+                }
+                return fn(info, nil)
+        })
+}
+</code>
+</pre>
 <br/>
+Well, I think this article is getting too long, I will try to devide it into parts. I think it will be 4 parts related to the implementation of <b>kubectl</b>.<br/><br/>
+I hope you learned something in this article! Please let me know in e-mail or twitter if I missed anything or if there is any typo.<br/>
+Well, that's it for today.<br/>
 <br/>
-<br/>
+
+
 
 Cheers <b>o/</b>
 
