@@ -7,7 +7,7 @@ We gonna talk about <b>kubectl</b> its code implementation and how it works duri
 First, we need to clone the k8s repository, of course am assuming that you have go installed and all the variables related to it like (GOPATH and GOROOT) are alraedy set.<br/>
 <code> go get -d k8s.io/kubernetes </code><br/>
 Once this done, you will see the structure of k8s's repository<br/>
-</pre><code>
+<pre><code>
 Godeps/ <br/>
 api/ <br/>
 build/ <br/>
@@ -127,14 +127,77 @@ As you can see here<br/><br/>
 </code></pre><br/>
 Cobra makes it very easy to locate which file implements each command line option. It gives also the ability to put the command <b>usage</b> alongside a brief description of what the command can do.<br/>
 While this is implemented in every piece of kuberenetes. So, you can walk through all kubectl commands and you can read their descriptions which will make you jump to the piece of code you need.<br/>
-Seems clear until now right?<br/> Okay, here is the magic! :D <br/>
-You can find duplicated commands and duplicated code. But, they do different jobs.<br/>
-Here is some PoC to let you understand well: <br/>
+As shown in lines 96-101 in the snippet of code, the strings Use, Short, Long, and Example all hold information describing the command and Run points to a function that actually runs the command.<br/>
+The RunCreate function invoked on line 109 is where the bulk of the kubectl create command is implemented. The implementation of this function can be found in the same file <b>create.go</b><br/>
+<pre>
 <code>
-
-
+205 func (o *CreateOptions) RunCreate(f cmdutil.Factory, cmd *cobra.Command) error {
+206         // raw only makes sense for a single file resource multiple objects aren't likely to do what you want.
+207         // the validator enforces this, so
+208         if len(o.Raw) > 0 {
+209                 return o.raw(f)
+210         }
+211
+212         if o.EditBeforeCreate {
+213                 return RunEditOnCreate(f, o.PrintFlags, o.RecordFlags, o.IOStreams, cmd, &o.FilenameOptions)
+214         }
+215         schema, err := f.Validator(cmdutil.GetFlagBool(cmd, "validate"))
+216         if err != nil {
+217                 return err
+218         }
+219
+220         cmdNamespace, enforceNamespace, err := f.ToRawKubeConfigLoader().Namespace()
+221         if err != nil {
+222                 return err
+223         }
+224
+225         r := f.NewBuilder().
+226                 Unstructured().
+227                 Schema(schema).
+228                 ContinueOnError().
+229                 NamespaceParam(cmdNamespace).DefaultNamespace().
+230                 FilenameParam(enforceNamespace, &o.FilenameOptions).
+231                 LabelSelectorParam(o.Selector).
+232                 Flatten().
+233                 Do()
+234         err = r.Err()
+235         if err != nil {
+236                 return err
+237         }
+238
+239         count := 0
+240         err = r.Visit(func(info *resource.Info, err error) error {
+241                 if err != nil {
+242                         return err
+243                 }
+244                 if err := kubectl.CreateOrUpdateAnnotation(cmdutil.GetFlagBool(cmd, cmdutil.ApplyAnnotationsFlag), info.Object, cmdutil.InternalVersionJSONEncoder()); err != nil {
+245                         return cmdutil.AddSourceToErr("creating", info.Source, err)
+246                 }
+247
+248                 if err := o.Recorder.Record(info.Object); err != nil {
+249                         glog.V(4).Infof("error recording current command: %v", err)
+250                 }
+251
+252                 if !o.DryRun {
+253                         if err := createAndRefresh(info); err != nil {
+254                                 return cmdutil.AddSourceToErr("creating", info.Source, err)
+255                         }
+256                 }
+257
+258                 count++
+259
+260                 return o.PrintObj(info.Object)
+261         })
+262         if err != nil {
+263                 return err
+264         }
+265         if count == 0 {
+266                 return fmt.Errorf("no objects passed to create")
+267         }
+268         return nil
+269 }
 </code>
-<br/>
+</pre>
 <br/>
 <br/>
 <br/>
