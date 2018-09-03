@@ -106,7 +106,7 @@ I took this piece of code from create.go file to demonstrate the implementation 
 The function associated to this starts from the line <b>92</b> and ends at the line <b>111</b><br/>
 You can notice there that kubernetes commands are implemented using the <a href="https://github.com/spf13/cobra">Cobra command framework</a>. Cobra provides a lot of great features for building CLI. <br/>
 As you can see here<br/><br/>
-<pre>   <code>     p { color: red; }     body { background-color: #eee; }   
+<pre>   <code>     
          cmd := &cobra.Command{<br/>
                  Use: "create -f FILENAME",<br/>
                  DisableFlagsInUseLine: true,<br/>
