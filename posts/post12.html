@@ -7,7 +7,7 @@ We gonna talk about <b>kubectl</b> its code implementation and how it works duri
 First, we need to clone the k8s repository, of course am assuming that you have go installed and all the variables related to it like (GOPATH and GOROOT) are alraedy set.<br/>
 <code> go get -d k8s.io/kubernetes </code><br/>
 Once this done, you will see the structure of k8s's repository<br/>
-<code>
+</pre><code>
 Godeps/ <br/>
 api/ <br/>
 build/ <br/>
@@ -23,12 +23,12 @@ test/ <br/>
 third_party/ <br/>
 translations/ <br/>
 vendor/ <br/>
-</code><br/>
+</code></pre><br/>
 For now, while we are talking about <i>kubectl</i>, we will be interested by <b>pkg/</b> folder. There we can find some sub-directories and files. <br/>
-<code>
+<pre><code>
 pi   auth   capabilities  cloudprovider  credentialprovider  fieldpath  kubeapiserver  kubelet   master  printers  proxy  registry  scheduler  securitycontext  ssh   version  watch <br/>
 apis  BUILD  client        controller     features            generated  kubectl        kubemark  OWNERS  probe     quota  routes    security   serviceaccount   util  volume   windows<br/>
-</code>
+</code></pre>
 <br/>
 As you can see, we have the folder <b>kubectl</b>. The folder in there which is <b>cmd</b> is the entry point for all kubectl commands.<br/>
 Every kubectl command has an initial entry point, it can be directly a file or if the command have several usage which will contain many go files, it will be under a folder.<br/>
