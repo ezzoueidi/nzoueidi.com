@@ -37,7 +37,7 @@ Sounds easy right? Okay :) let's trace that kubectl create command and see where
 There is always more than one way to do that. You can dump or display information from the kubectl binary itself using objdump for example<br/>
 or just go and read the documentation and have a quick look on the sub-directories in <b>pkg/kubectl/cmd/</b> and you will notice that there is a folder with <b>create</b> as a name.<br/>
 Let's open the go file <i>pkg/kubectl/cmd/create/create.go</i> which is associated to the kubectl create command including every possible argument.<br/>
-<code>
+<pre><code>
  81 func NewCreateOptions(ioStreams genericclioptions.IOStreams) *CreateOptions { <br/>
  82         return &CreateOptions{ <br/>
  83                 PrintFlags:  genericclioptions.NewPrintFlags("created").WithTypeSetter(scheme.Scheme),<br/>
@@ -100,7 +100,7 @@ Let's open the go file <i>pkg/kubectl/cmd/create/create.go</i> which is associat
 140         cmd.AddCommand(NewCmdCreateRole(f, ioStreams))<br/>
 141         cmd.AddCommand(NewCmdCreateRoleBinding(f, ioStreams))<br/>
 142         cmd.AddCommand(NewCmdCreatePodDisruptionBudget(f, ioStreams))<br/>
-</code>
+</code></pre>
 <br/>
 I took this piece of code from create.go file to demonstrate the implementation of the command <b>kubectl create -f file</b> at the runtime. <br/> 
 The function associated to this starts from the line <b>92</b> and ends at the line <b>111</b><br/>
