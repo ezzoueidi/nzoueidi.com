@@ -1,0 +1,34 @@
+<title> Ingress k8s - Let's play around it </title>
+<center> Ingress k8s - Let's play around it </center>
+<br/>
+<hr/>
+<br/>
+I am going to talk about Ingress in Kubernetes, and for educational purposes we gonna tweak it so we can understand all the common behaviors of Ingress.<br/>
+Let's first give a brief description about Ingress, in order to expose your application(s) which are running as service(s) that are running in k8s pods to outside the cluster.<br/>
+This applications/services are going to be used by people which obviously they are living outside of your k8s cluster, so we need to define an Ingress resource where it specifies <br/>
+how we want external clients to connect to our services. <br/>
+DISCLAIMER: this is ""
+Here is a simple snippet of YAML code to define an Ingress object.
+<pre>
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: k8s-ingress
+spec:
+ rules:
+   - host: k8s.nzoueidi.com
+     http:
+       paths:
+       - backend:
+           serviceName: k8s-nzoueidi
+           servicePort: 80
+</pre> 
+Here for example the Ingress controller configures itself so it can reads the Ingress resource and routes the incoming traffic.<br/>
+It would act as L7 LB. An L7 LB is "Layer 7 Load Balancing", it operates at the high-level application layer, which deals with the actual content of each message. <br/>
+L7 LB terminates the network traffic and reads the messange whithin. And the most important part is that it makes a load-balancing decision based on the content of the message<br/>
+that went through the network.. It then make a new TCP connection to the selected upstream server or in some cases resues an existing one which is applicable to HTTP keepalives. <br/>
+Anyway, this is not our topic, you can duckduck it and you will have many examples of L7 load-balancing.. <br/>
+Let's back to Ingress, many people expose their apps using "Port Forwarding", this is not good for production matter as it simply forwards the requests you get from port on the client machine<br/>
+directly to the targeted pod. Also, in the same context we have "HostPort", in some places they call it as "Host Network", it is a mechanism where ports on a worker node in our k8s cluster <br/>
+are directly mapped to ports on pods, which is silly - here you need to have these ports opened for outside communcation and as a limitation, here you need to have only one pod per node.. <br/>
+So, to expose your applications the right way, you have many good serious ways; one of them which is the most good way is Ingress.
