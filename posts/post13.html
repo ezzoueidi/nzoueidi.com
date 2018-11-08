@@ -31,4 +31,69 @@ Anyway, this is not our topic, you can duckduck it and you will have many exampl
 Let's back to Ingress, many people expose their apps using "Port Forwarding", this is not good for production matter as it simply forwards the requests you get from port on the client machine<br/>
 directly to the targeted pod. Also, in the same context we have "HostPort", in some places they call it as "Host Network", it is a mechanism where ports on a worker node in our k8s cluster <br/>
 are directly mapped to ports on pods, which is silly - here you need to have these ports opened for outside communcation and as a limitation, here you need to have only one pod per node.. <br/>
-So, to expose your applications the right way, you have many good serious ways; one of them which is the most good way is Ingress.
+Before, we go through many good serious ways, we want to know why the hell we want to use Ingress in any similar scenarios. Alright, let's describe the low level of our network stack. <br/>
+In a general way, connections and requests theorically are operating through Layer 4 which is TCP or Layer 7 which is http, rpc, etc.. In the kernel side, Netfilter is the one which is responsible<br/>
+for routing rules, this is basically in the Layer 3 of OSI which is the Network Layer. If we gonna talk about Netfilter, this article will be long and bored. So briefly Netfilter have five principale<br/>
+hooks that programs can register with. As packets are going through the stack, they will trigger some kernel modules that have registred with these hooks, it depends on the packet itself, if it is <br/>
+icoming or outgoing, also the packet desitination and wether the packet was dropred or rejected. Anyway..a packet when it is coming to our cluster, more specifically to our node's desired interface<br/>
+is processed by Netfilter, matches the rules established and it is forwarded to the IP of the available and healthy pod.<br/>
+So, to expose your applications we need to implement the same overview above. Thus, our end-users will have to call the cluster IP and port because this is where all the toolchain described starts. <br/>
+But, the IP we are talking about is only reachable from inside the cluster. The question here how the heck we can forward a public IP endpoint to and IP that is only reachable once the packet<br/>
+is already on a node?<br/>
+You can use many "Tell" ways:
+<ul>
+	<li> Examine the netfilter rules and make a use from iptables's utility, the issue here that node(s) are ephemeral, same thing for pod(s) <br/>
+		and also the big issue here that rules you made are operating at Layer 3 (we talked about above) they don't if your services are healthy or not.<br/>
+	If the node is somehow unreachable the route also also will remain unreachable and stay broken.</li>
+	<li> Put everything in the k8s master, well I am sure that you would not do that as long as you are a human being. </li>
+	<li> Use a Simple LoadBalancer in front for distributing client traffic to the nodes in our cluster, for this we need a Public IP address and the addresses of the nodes.<br/>
+	The issue here that when an end-user wnat to connect to our service using other port (e.g 80) we can not afford that the request of that packets using that port to the node's interface.. </li>
+	<li> There are other many non-good ways.. This is because we don't have any kind of listners like processes on the IP address of the targeted node. </li>
+</ul>
+<br/>
+To prevent these issues, Kubernetes solve it by something called "NodePort". Here is a snippet for NodePort service in k8s. <br/>
+<pre>
+kind: Service
+apiVersion: v1
+metadata:
+  name: service-nodeport
+  spec:
+    type: NodePort
+      selector:
+          app: nodeport-app
+	    ports:
+	      - port: 80
+	      targetPort: http
+</pre>
+A service like this is a ClusterIP service with the a nice capability which is: the IP of the node is reachable as well as the cluster IP. How it works exactly?<br/>
+It tells kube-proxy to allocate a port in a regular range and opens the associated port in every node's interface. Like this we can make sure that any traffic can be routed to any node without any problems.<br/>
+So, here we used NodePort to expose our service to our end-users on a "fake" port. This is good while our load balancer can reach the real port internally and hide it from the end-user. <br/>
+But, this is not suffice as a complete a solution for loadbalancing our service(s). This is where Ingress shows up. <br/>
+Another service of type "LoadBalancer", it contains the capababilities of NodePort service and the ability to have a complete Ingress path. <br/>
+If you are using a cloud provider which have or supports API driven configuration of networking resources, you can try this snippet of YAML code. <br/>
+<pre>
+kind: Service
+apiVersion: v1
+metadata:
+  name: service-loadbalancer
+  spec:
+    type: LoadBalancer
+      selector:
+          app: loadbalancer-app
+	    ports:
+	      - port: 80
+	      targetPort: http
+</pre>
+You will notice that an external IP has been allocated by typing <pre> kubectl get svc service-loadbalancer </pre> <br/>
+To be fair, the service LoadBalancer have some limitations like it can not determine HTTPS traffic in the Loadbalancer level. <br/>
+Ingress componenets are the following:
+- Ingress Resource: is a k8s resource which defines rules that are used by the Ingress Controller to route only incoming traffic. <br/>
+- Ingress Controller: an application which captures incoming requests and routes them accordinly by the rules that are already mentioned in the Ingress Resource. <br/>
+- Default Backend: it is simply a small application that catches all the traffic that are not relevant rules defined by the Ingress Resource and shows up a 404 page. <br/>
+<br/>
+ 
+
+
+
+
+
