@@ -1,5 +1,5 @@
-<title> Ingress k8s - Let's play around it </title>
-<center> Ingress k8s - Let's play around it </center>
+<title> Ingress k8s - Let's play around it -- Part I </title>
+<center> <b> Ingress k8s - Let's play around it </b> </center>
 <br/>
 <hr/>
 <br/>
@@ -37,6 +37,18 @@ for routing rules, this is basically in the Layer 3 of <i>OSI</i> which is the N
 hooks that programs can register with. As packets are going through the stack, they will trigger some kernel modules that have registred with these hooks, it depends on the packet itself, if it is <br/>
 icoming or outgoing, also the packet desitination and wether the packet was dropred or rejected. Anyway..a packet when it is coming to our cluster, more specifically to our node's desired interface<br/>
 is processed by <b>Netfilter</b>, matches the rules established and it is forwarded to the IP of the available and healthy pod.<br/>
+
+The <b>Netfilter</b> have some hooks that are invoked in the networking stack of the Linux kernel. <br/>
+These are the essential hooks that help kernel modules to call them whenever it is needed, anyway this is another article am planning to write. <br/>
+- <b>NF_IP_PRE_ROUTING</b><br/>
+- <b>NF_IP_LOCAL_IN</b> <br/>
+- <b>NF_IP_FORWARD</b><br/>
+- <b>NF_IP_LOCAL_OUT</b><br/>
+- <b>NF_IP_POST_ROUTING</b><br/><br/>
+This is an architecture of the packet flow in Netfilter and General Networking in Linux. <br/><br/>
+<img src="https://fr.wikipedia.org/wiki/Netfilter#/media/File:Netfilter-packet-flow.svg"</img><br/><br/>
+Don't worry as I said I will cover this is another article. <br/><br/>
+
 So, to expose your applications we need to implement the same overview above. Thus, our end-users will have to call the cluster IP and port because this is where all the toolchain described starts. <br/>
 But, the IP we are talking about is only reachable from inside the cluster. The question here how the heck we can forward a public IP endpoint to and IP that is only reachable once the packet<br/>
 is already on a node?<br/>
