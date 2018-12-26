@@ -14,7 +14,7 @@ GDB works by attaching processes, execute some system calls which they give it m
 I am assuming also that you know how processes works under Linux. One of these syscalls that GDB calls is <b><i>ptrace</i></b>.
 Ptrace is (Process Trace) a system call, it provides a powerful mechanism by which a PPID (Parent Process ID) can observe and control of other processes. It allows also the examining of how memory addresses are allocated<br/>
 to your software and reads the stack of registers, here where it could also give permissions to set breakpoints and invoke other syscalls.<br/>
-So, to resume any debugger in Linux in order to do what it must do; it need to have the support of the kernel side. I bet anyone would be interested to know the black magic that the kernel and hopefully this is what<br/>
+So, to resume any debugger in Linux in order to do what it must do; it need to have the support of the kernel side. I bet anyone would be interested to know the black magic that the kernel does and hopefully this is what<br/>
 am gonna cover also here :)<br/>
 Here is a simple prototype of ptrace:<br/>
 <pre>
@@ -24,22 +24,36 @@ long ptrace(enum __ptrace_request request, pid_t pid,
 <br/>
 Additionally, ptrace allows a debugger process to access the low level stack about another proecess (debugee).<br/>
 Before, we get into how ptrace is implemented in the Linux kernel, we need to mention some sub syscalls that ptrace invoke.<be/>
-As, we can see from the prototype of ptrace, it uses four arguments <i> enum __ptrace_request request</i>, <i>pid_t pid</i>, <i>void *addr</i> and <i>void *data</i>.<br/>
-The first argument determines the behaviour of ptrace itself and how other arguments are used.<br/>
-In the end ptrace will perform one of these action or let's say sub-syscalls:<br/>
+As, we can see from the prototype of ptrace, it uses four arguments <i><b>enum __ptrace_request request</b></i>, <i><b>pid_t pid</b></i>, <i><b>void *addr</b></i> and <i><b>void *data</b></i>.<br/>
+The first argument <i><b>enum __ptrace_request request</b></i> determines the behaviour of ptrace itself and how other arguments are used. This is defined in <i>sys/ptrace.h</i><br/>
+In other words, this argument is the most important one as it specifies what action or operation we gonna do with ptrace(), whether it is reading a register from debuggee's process<br/>
+getting vaules from its memory.<br/>
+For the second argument <i><b>pid_t pid</b></i> it obviously specifies the PID of the debuggee (our target program). However, one single process can do magic by debugging several other processes.<br/>
+The last two args are <i><b>void *addr</b></i> and <i><b>void *data</b></i> optional.
+<br/><br/>
+In the end ptrace will perform one of these action or what I want to call sub-syscalls. The following PTRACE_* are called due to our first argument in <i>ptrace()</i> that we talked about.<br/>
 <b>- PTRACE_TRACEME</b>: Indicates that this process is to be traced its parent. This is only invoked and used by the child process.<br/>
-<b>- PTRACE_PEEKTEXT</b>: <br/>
-<b>- PTRACE_PEEKDATA</b>: <br/>
-<b>- PTRACE_PEEKUSER</b>: It allows to read from the USER <br/>
-<b>- PTRACE_POKETEXT</b>: <br/>
-<b>- PTRACE_POKEDATA</b>: <br/>
-<b>- PTRACE_POKEUSER</b>: <br/>
-<b>- PTRACE_GETREGS</b>: <br/>
-<b>- PTRACCE_GETFPREGS</b>: <br/>
-<b>- PTRACE_SETREGS</b>: <br/>
-<b>- PTRACE_SETFPREGS</b>: <br/>
-<b>- PTRACE_CONT</b>: <br/>
-<b>- PTRACE_SYSCALL</b>: This is basically obvious where it made a call to ptrace(), it makesthe kernel stop the child process whenever a syscall entry or exist is made.
-<b>- PTRACE_SINGLESTEP</b>: <br/>
-<b>- PTRACE_DETACH</b>: <br/>
+<b>- PTRACE_PEEKTEXT and PTRACE_PEEKDATA</b>: They reads a word at the location addr in the child’s memory, returning the word as the result of the <b>ptrace()</b> call.
+<b>- PTRACE_PEEKUSER </b>: It allows to read from the USER area's tracee, where it holds the registers and other useful information. <br/>
+<b>- PTRACE_POKEUSER</b>: It copies the word data to offset <i>addr</i> in the child's user area.<br/>  
+<b>- PTRACE_POKETEXT and PTRACE_POKEDATA</b>: Both copies the word <i>data</i> to location <i>addr</i> in the child's memory.<br/>
+<b>- PTRACE_GETREGS and PTRACCE_GETFPREGS</b>: Both copies the child's general purpose or <i>floating-registers</i> to location data in parent.<br/>
+<b>- PTRACE_SETREGS and PTRACE_SETFPREGS</b>: It does the same as PTRACE_GETREGS and PTRACE_GETFPREGS but with limited permissions. <br/>
+<b>- PTRACE_CONT</b>: This is invoke a restart action for the stopped child process.<br/>
+<b>- PTRACE_SYSCALL</b>: This is basically obvious where it made a call to ptrace(), it makes the kernel stop the child process whenever a syscall entry or exist is made.<br/>
+<b>- PTRACE_SINGLESTEP</b>: It does what PTRACE_CONT does but it gives the ability for the child process to be stopped at the next entry/exit<br/>
+<b>- PTRACE_ATTACH</b>: Attaches to the process specified in pid, making it a traced "child" of the current process.<br/>
+<b>- PTRACE_DETACH</b>: Restarts the stopped child as for PTRACE_CONT, but first detaches from the process, undoing the reparenting effect of PTRACE_ATTACH, and the effects of PTRACE_TRACEME.<br/><br/>
+Actually, this is not all the list that ptrace() is capable to do, but for educational purposes and for the sake of simplicity, I am gonna talk only about the PTRACE_* that matters in this article.<br/>
+I want also to mention that in order to execute our ptrace() syscall, we need really to go through other syscalls. It is really fun to do all of this. I am gonna talk briefly about all of this.<br/>
+First of all, we need to initiate our tracee's PID, so we can attach it to our debugger. So, in order to initiate it, we need to call the fork() syscall and having the result child do a PTRACE_TRACEME.<br/>
+Followed then by another syscall which is exec(). Here where our debugger like GDB can attach the process of the tracee by doing a PTRACE_ATTACH.<br/>
+However, we didn't complete our mission here. The tracee's process can stop each time when a signal is delivered. If this happens. Our parent process need to wait by calling wait() syscall.<br/>
+Then, it can go and inspect or even modify the child process while it is stopped. If the parent process have the information and maybe the values that it want from the tracee, it can then <br/>
+resume and continue the work of the tracee.<br/>
+Finally, when the debugger have finished tracing, it can terminate the child's process by sending PTRACE_KILL or let the tracee live in the normal mode that it supposed to be by deattaching it and that's by invoking PTRACE_DEATTACH.<br/>
+
+
+
+
 
