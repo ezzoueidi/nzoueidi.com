@@ -1,0 +1,45 @@
+<title> How debuggers like GDB really works? </title>
+<center> <b> How debuggers like GDB really works</b> </center>
+<br/>
+<hr/>
+<br/>
+Hey all, here is another post related to <b>Into the wild</b> collection. We gonna talk here about GDB - how it works and what internal functions and syscalls it does in order to debug your preferred program. <br/>
+I am assuming here that you have already the basics of debugging from usage point of view. So, I may not introduce you the usual commands to interact with GDB.<br/>
+In general, debugger is a tool where it have a vast control of the execution of a software, it can directly talk with the process of your program and manage certain actions. <br/>
+The question that came to anyone's mind here, how GDB can do all of that?<br/>
+Before getting into answering this question, let's first go the opposite way and see what GDB can't do. <br/>
+Usually, GDB does not simulate the execution of the target software, in other words, it doesn't read and interept the binary instructions of your software and execute it, that would be very very slow<br/>
+However, there are other tools that can do that, for example <a href="http://www.valgrind.org/" target="_blank">Valgrind</a>. That's also applicable for the way <a href="https://www.qemu.org/" target="_blank">Qemu</a><br/>
+GDB works by attaching processes, execute some system calls which they give it more capabibilities to have almost full control about the process of your software.<br/>
+I am assuming also that you know how processes works under Linux. One of these syscalls that GDB calls is <b><i>ptrace</i></b>.
+Ptrace is (Process Trace) a system call, it provides a powerful mechanism by which a PPID (Parent Process ID) can observe and control of other processes. It allows also the examining of how memory addresses are allocated<br/>
+to your software and reads the stack of registers, here where it could also give permissions to set breakpoints and invoke other syscalls.<br/>
+So, to resume any debugger in Linux in order to do what it must do; it need to have the support of the kernel side. I bet anyone would be interested to know the black magic that the kernel and hopefully this is what<br/>
+am gonna cover also here :)<br/>
+Here is a simple prototype of ptrace:<br/>
+<pre>
+long ptrace(enum __ptrace_request request, pid_t pid,
+                   void *addr, void *data);
+</pre>
+<br/>
+Additionally, ptrace allows a debugger process to access the low level stack about another proecess (debugee).<br/>
+Before, we get into how ptrace is implemented in the Linux kernel, we need to mention some sub syscalls that ptrace invoke.<be/>
+As, we can see from the prototype of ptrace, it uses four arguments <i> enum __ptrace_request request</i>, <i>pid_t pid</i>, <i>void *addr</i> and <i>void *data</i>.<br/>
+The first argument determines the behaviour of ptrace itself and how other arguments are used.<br/>
+In the end ptrace will perform one of these action or let's say sub-syscalls:<br/>
+<b>- PTRACE_TRACEME</b>: Indicates that this process is to be traced its parent. This is only invoked and used by the child process.<br/>
+<b>- PTRACE_PEEKTEXT</b>: <br/>
+<b>- PTRACE_PEEKDATA</b>: <br/>
+<b>- PTRACE_PEEKUSER</b>: It allows to read from the USER <br/>
+<b>- PTRACE_POKETEXT</b>: <br/>
+<b>- PTRACE_POKEDATA</b>: <br/>
+<b>- PTRACE_POKEUSER</b>: <br/>
+<b>- PTRACE_GETREGS</b>: <br/>
+<b>- PTRACCE_GETFPREGS</b>: <br/>
+<b>- PTRACE_SETREGS</b>: <br/>
+<b>- PTRACE_SETFPREGS</b>: <br/>
+<b>- PTRACE_CONT</b>: <br/>
+<b>- PTRACE_SYSCALL</b>: This is basically obvious where it made a call to ptrace(), it makesthe kernel stop the child process whenever a syscall entry or exist is made.
+<b>- PTRACE_SINGLESTEP</b>: <br/>
+<b>- PTRACE_DETACH</b>: <br/>
+
