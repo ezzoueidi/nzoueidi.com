@@ -1,15 +1,16 @@
 <title> How debuggers like GDB really works? </title>
-<center> <b> How debuggers like GDB really works</b> </center>
+<center> <b> How debuggers like GDB really works?</b> </center>
 <br/>
 <hr/>
 <br/>
-Hey all, here is another post related to <b>Into the wild</b> collection. We gonna talk here about GDB - how it works and what internal functions and syscalls it does in order to debug your preferred program. <br/>
+Hey all, here is another post related to <b>Into the wild</b> collection. We gonna talk here about GDB in general and <i>ptrace()</i> in particular.<br/>
+How GDB works and what internal functions and syscalls it does in order to debug your preferred program. <br/>
 I am assuming here that you have already the basics of debugging from usage point of view. So, I may not introduce you the usual commands to interact with GDB.<br/>
 In general, debugger is a tool where it have a vast control of the execution of a software, it can directly talk with the process of your program and manage certain actions. <br/>
 The question that came to anyone's mind here, how GDB can do all of that?<br/>
 Before getting into answering this question, let's first go the opposite way and see what GDB can't do. <br/>
 Usually, GDB does not simulate the execution of the target software, in other words, it doesn't read and interept the binary instructions of your software and execute it, that would be very very slow<br/>
-However, there are other tools that can do that, for example <a href="http://www.valgrind.org/" target="_blank">Valgrind</a>. That's also applicable for the way <a href="https://www.qemu.org/" target="_blank">Qemu</a><br/>
+However, there are other tools that can do that, for example <a href="http://www.valgrind.org/" target="_blank">Valgrind</a>. That's also applicable for the way <a href="https://www.qemu.org/" target="_blank">Qemu</a> works.<br/>
 GDB works by attaching processes, execute some system calls which they give it more capabibilities to have almost full control about the process of your software.<br/>
 I am assuming also that you know how processes works under Linux. One of these syscalls that GDB calls is <b><i>ptrace</i></b>.
 Ptrace is (Process Trace) a system call, it provides a powerful mechanism by which a PPID (Parent Process ID) can observe and control of other processes. It allows also the examining of how memory addresses are allocated<br/>
@@ -51,8 +52,19 @@ Followed then by another syscall which is exec(). Here where our debugger like G
 However, we didn't complete our mission here. The tracee's process can stop each time when a signal is delivered. If this happens. Our parent process need to wait by calling wait() syscall.<br/>
 Then, it can go and inspect or even modify the child process while it is stopped. If the parent process have the information and maybe the values that it want from the tracee, it can then <br/>
 resume and continue the work of the tracee.<br/>
-Finally, when the debugger have finished tracing, it can terminate the child's process by sending PTRACE_KILL or let the tracee live in the normal mode that it supposed to be by deattaching it and that's by invoking PTRACE_DEATTACH.<br/>
-
+Finally, when the debugger have finished tracing, it can terminate the child's process by sending PTRACE_KILL or let the tracee live in the normal mode that it supposed to be by deattaching it and that's by invoking PTRACE_DEATTACH.<br/><br/>
+Okay, until this point we knew how to trace our debugee's process and attach it to the debugger which is our GDB.<br/>
+This is good but unfortunatey it is not enough to start your journey with debugging. We need to put some breakpoints where we can interrupt our debuggee's process<br/>
+and then we can examine its stack and managing its information,registers, etc.. In order to do this we need to make some signals.<br/>
+Hopefully, this is managed by the kernel space based on our debugger (GDB), the kernel space notifie us through GDB by using events that occur to our debuggee.<br/>
+To implement PTRACE_TRACEME, the kernel shoots the debugee or the tracee's process by SIGSTOP, respectively we receive a SIGCHLD; then a new process is spawned and here where <br/>
+PTRACE_TRACEME execute. This new process will get a SIGTRAP once it attemps to do an exec() or execve() syscall.<br/>
+Lastly, we gonna be notified by the SIGCHLD about the process that got spawned and traced. <br/>
+Unfortunately, <i>ptrace()</i> does a lot of cool things. But, it is not sufficient to start debugging, <i>ptrace()</i> syscall doesn't allow us or our debugger to put breakpoints.<br/>
+This is why we used <b>SIGNALS</b> alongside <i>ptrace()</i> syscall.<br/>
+Next part I am gonna cover some aspects about breakpoints that any debugger like GDB does.<br/>
+<br/><br/>
+<b>Cheers o/</b>
 
 
 
