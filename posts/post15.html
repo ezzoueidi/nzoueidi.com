@@ -1,0 +1,16 @@
+<title> Backup your kubernetes cluster in many ways! </title>
+<center> <b> Backup your kubernetes cluster in many ways!</b> </center>
+<br/>
+<hr/>
+<br/>
+Hey folks, the most challenging tasks given to a person who runs Kubernetes in production is to take backups and apply a disaster recovery plan(s) to roll back whenever it is needed.<br/>
+There are many methods and techniques to do so, I am gonna list many ways to implement the disaster recovery and the backups.<br/>
+First of all, the question that need to be asked is:<br/>
+What are the most important pieces in a kubernetes cluster that need to be backed up?<br/>
+As all the resources in k8s are treated as an API object. I would say then everything is important unless you have a limited storage where you gonna apply your backup!<br/>
+In this case, you may want to backup your microservice application(s) that is/are running on your k8s cluster (data). Besides, the etcd* components (etcd and etcd-events).<br/> 
+This is in my opinion the most importnant critical pieces but until here we are talking only about backups but what are their values if we could not apply them!<br/>
+This is what I will try to cover later in the article.<br/>
+Let's go into the manual way that will allow us to take backups on our kubernetes cluster.<br/><br/>
+I am assuming here that there is only one master. If you have many you can repeat the same process on all the master nodes you have. <br/>
+
