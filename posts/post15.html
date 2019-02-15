@@ -8,9 +8,49 @@ There are many methods and techniques to do so, I am gonna list many ways to imp
 First of all, the question that need to be asked is:<br/>
 What are the most important pieces in a kubernetes cluster that need to be backed up?<br/>
 As all the resources in k8s are treated as an API object. I would say then everything is important unless you have a limited storage where you gonna apply your backup!<br/>
-In this case, you may want to backup your microservice application(s) that is/are running on your k8s cluster (data). Besides, the etcd* components (etcd and etcd-events).<br/> 
+In this case, you may want to backup your microservice application(s) that is/are running on your k8s cluster (data). Besides, the <b>etcd*</b> components <i>(etcd and etcd-events)</i>.<br/> 
 This is in my opinion the most importnant critical pieces but until here we are talking only about backups but what are their values if we could not apply them!<br/>
 This is what I will try to cover later in the article.<br/>
 Let's go into the manual way that will allow us to take backups on our kubernetes cluster.<br/><br/>
 I am assuming here that there is only one master. If you have many you can repeat the same process on all the master nodes you have. <br/>
-
+In order to back up your <b>etcd</b>, we need the <b>certificates</b>.<br/>
+<pre>
+$ sudo cp -r /etc/kubernetes/pki backup/
+$ sudo docker run --rm -v $(pwd)/backup:/backup --network host -v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd --env ETCDCT_API=3 k8s.gcr.io/etcd-amd64:3.2.18 \
+etcdctl --endpoint=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.py snapshot save /backup/etcd.db
+</pre> 
+To restore the etcd <b>backup</b>, you will need to perform the backup you just took the inverse way. You will just need to replace <code>save</code> by <code>restore</code><br/>
+and then move the data back to <code>/var/lib/etcd/</code><br/>
+To automate this process you can create a <b>cronjob</b> in Kubernetes. The documentation is so clear<a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/" target="_blank">[1]</a> and <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" target="_blank">[2]</a><br/>
+However, the tool that I like the most about backup and disaster recovery where I started contributing recently is <a href="https://github.com/heptio/velero" target="_blank">Velero</a>. <br/>
+This tool is written by Golang and developed by <a href="https://heptio.com/" target="_blank">Heptio</a> folks. In a short words, Velero consists of a server that runs on your cluster and a CLI that runs locally.<br/>
+What makes it very powerfull is that it supports many cloud providers and of course on-premise infrastructures. It gives you the ability to copy your cluster resources to other clusters and replicates your environment.<br/>
+You can install Velero by downloading the <a href="https://github.com/heptio/velero/releases" target="_blank">latest release</a> or just clone the <a href="https://github.com/heptio/velero" target="_blank">code</a> and checkout the appropriate tag you would work with.<br/>
+To set up your server, you need to start the local storage service by applying some yaml files.<br/>
+<pre>
+$ kubectl apply -f examples/common/00-prereqs.yaml
+$ kubectl apply -f examples/minio/
+</pre>
+That's it! Pretty easy. You will now simulate a deployment by creating any example (e.g: nginx deployment). Then try to back up it. <br/>
+<pre>
+$ velero backup create test-backup --selector label=value
+</pre>
+or if you would like to backup a namespace in your cluster, including everything.<br/>
+<pre>
+$ velero backup create test-backup --include-namespaces examples_namespace
+</pre>
+Otherwise, if you want to backup all objects except those matching the label <code>label=ignore</code>
+<pre>
+$ velero backup create test-backup --select 'label notin (ignore)'
+</pre>
+You can add <code>--schedule</code> flag to make scheduled backups. The scheduling will be on a cron <a href="https://en.wikipedia.org/wiki/Cron#CRON_expression" target="_blank">expression</a><br/>
+Then, if you want to restore your backups, you need to run <code> velero restore create --from-backup test-backup</code><br/>
+The same as <code>kubectl</code>, you can describe your backups, first by getting the name of the restore then by describing it. <br/>
+<pre>
+$ velero restore get 
+$ velero restore describe restore_name
+</pre>
+Finally, you can delete backups that you took by doing <code> velero backup delete test-backup</code>.
+<br/>
+<br/>
+Thanks for passing by, let me know if I missed something. <b>o/</b>
