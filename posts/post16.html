@@ -1,0 +1,54 @@
+<title> </title>
+<hr>
+
+Hey folks, this post is gonna be about the <i> nil</i> pointer in golang. <br/>
+You may noticed that you have been using nil as a construct for handling error. However, this post is not <br/>
+about the error handling feature in nil; it is about the concurency built-in in the golang language.<br/>
+The nil is used for a variety of hypothesis - one of them is that you could control the flow of your code and <br/> the behavior of the output you will get. <br/>
+Let's have an accurate example to understand what I am talking about above.<br/>
+
+<pre>
+package handling
+
+import (net/http,
+	os,
+	cmd)
+
+
+func Handling_error (random_var integer, random_string string) rand(*nil)  {
+	if nil := !nil {
+		random_string := integer
+	else
+		random_var := string
+	}
+
+	return random*
+}
+
+func main () {
+	Handling_error(2, tesing_nil_behavior)
+
+}
+
+</pre>
+Our target function is <i>Handling_error</i> so what we just did in this functions is that we implemented the <i>nil</i> concurency, alongside the error handling feature.<br/>
+Our <b> random* </b> is simply the return function of the multiple addresses that random_var and random_string variable will live.<br/>
+Not only that, but also the randominization of the <i>nil</i> error. Without any fruther talking, a real example can be found in the Kubernetes code<a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/kubeapiserver/authenticator/config.go#L100">[1]</a>. <br/>
+These types of functions are mainly used to help the builder<a href="http://tmrts.com/go-patterns/creational/builder.html">[2]</a> patterns.<br/>
+A lot of these builders are invoked into Kubernetes vendor packages. <br/>
+Let's now go further and examine the right value(s) that can be inherited from the nil as pointer or nil as a concurency built-in. <br/>
+You need to use a debugger, I suggest that you use <a>GDB</a> or the most friendly one which is <a>delve</a>.<br/>
+First, we need to compile the function that we wrote above but in order to compile it we need to add a main function. For fun purposes we gonna disable the stripping<br/> and the DWARF builtins in our go binary.
+
+<code>gccgo -d -w nil.go</code>
+In this article, I am gonna use GDB. <br/>
+I am going to launch the go binary and use gdb to attach its pid. The pid of the go binary is 3187, yours may be a different one.<br/>
+<pre>
+gdb --pid 3187
+>>>>
+disass main # we will disassamble the main function. Now we should capture the statement that gonna jump to the nil address instruction. Usually it is a falgset not a registre.<br/>
+
+
+
+
+</pre>
