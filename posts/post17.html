@@ -1,7 +1,94 @@
-<title> Interfaces in Golang </title>
-<center> <b> Interfaces in Golang </b> </center>
+<title> Goroutines #1 </title>
+<center> <b> Goroutines #1 </b> </center>
 <br/>
 <hr/>
 <br/>
 
+Hey there, I am here again to talk about Goroutines and their anatomy in what is known now as <b>concurrency</b>.<br/>
+Many of the articles and posts in the net shows you how to use goroutines and how they are different from <b>parlellism</b>.<br/>
+What I would like to do here is to illustrate the main reasons behind inventing goroutines and its real implementation behind the scene.<br/>
+Most important points that I will try to cover in the next parts are:<br/>
+<ul>
+	<li>Difference between Goroutines and Threads and Coroutines.</li>
+	<li>How goroutines are executed and how they can be blocked</li>
+	<li>CSP and communication in goroutines</li>
+	<li>Evolution of goroutines stack</li>
+</ul>
+This is will be devided most likely to five parts, so this is the 1st part and to start, we should define what the hell is Goroutines?<br/>
+It is simply a function or method that is running in background concurrently with other goroutines, compared to OS threads goroutines are much lightweight.<br/>
+You can have thousands of goroutines running concurrently and they can speed up your application.<br/>
+<br/>
+You should know that even if you are not using goroutines explicitly in the code, well you are using one at least!<br/>
+Weired, right? No, by default if you write a Go application and run/build it, you will have one goroutine which is known as the <b>main goroutine</b>.<br/>
+It is created so the <b>main</b> func in your Go code can operates on.<br/>
+You can count how much goroutine you have by importing <b>runtime</b> package and examine the it by printing the goroutine stack trace using <b>runtime/pprof</b>.<br/>
+<pre>
+package main
+
+import (
+        "log"
+	"os"
+	"runtime"
+	"runtime/pprof"
+)
+
+func main() {
+        r := runtime.NumGoroutine()
+        log.Println("Num of goroutines: ", r)
+        pprof.Lookup("goroutine").WriteTo(os.Stdout, 1)
+}
+
+</pre>
+You will get the following output:<br/>
+<pre>
+2019/07/28 08:53:27 Num of goroutines:  1
+goroutine profile: total 1
+1 @ 0x4ad190 0x4acfb0 0x4a9b80 0x4b3d87 0x42b93c 0x453561
+#       0x4ad18f        runtime/pprof.writeRuntimeProfile+0x8f  /usr/local/go/src/runtime/pprof/pprof.go:708
+#       0x4acfaf        runtime/pprof.writeGoroutine+0x9f       /usr/local/go/src/runtime/pprof/pprof.go:670
+#       0x4a9b7f        runtime/pprof.(*Profile).WriteTo+0x38f  /usr/local/go/src/runtime/pprof/pprof.go:329
+#    <b>0x4b3d86        main.main+0xd6                          /root/work/test-goroutines.go:13</b>
+#    <b>0x42b93b        runtime.main+0x20b                      /usr/local/go/src/runtime/proc.go:200</b>
+</pre>
+Let's now create an example where we gonna use <b>goroutine</b>, for the sake of simplicity, we will use a Hello World example.<br/>
+<pre>
+package main
+
+import "fmt"
+
+func printHelloWorld() {
+	fmt.Println("Hello World")
+}
+
+func main () {
+	fmt.Println("Starting the execution of our main func.")
+	
+	// Create our goroutine
+	go printHelloWorld()
+
+	fmt.Println("Ending the execution of our main func.")
+}
+</pre>
+If we try to run our program <i>go run goroutine.go</i>, we will notice that the program didn't print our "Hello World" that we invoked using goroutine.
+The output of the executing will be like this:<br/>
+<pre>
+Starting the execution of our main func.
+Ending the execution of our main func.
+</pre>
+That's a normal behavior from our program, while goroutines are intended to work in background, but our goroutine in the example above is calling the <b>printHelloWorld</b> func.</br>
+So, why we are not seeing our output?<br/>
+As discussed before, we have already a default goroutine running for the main func. So this default goroutine spawns another goroutine.
+When the program is being executed, we will have two goroutines running concurrently. Thus, when the main goroutine starts executing<br/>
+the go scheduler dot not pass control to the second goroutine until it execute completely.<br/>
+Sadly, the main goroutine is done with execution, the program terminates immediately and scheduler did not get time to schedule the second one.<br/>
+Here, we can use some blocking conditions, so we can pass the control to other goroutines manually by using the <b>Sleep</b> function from <b>time</b> package.<br/>
+Adding this line <code>time.Sleep(10 * time.Millisecond)</code> just before the call for our second goroutine, will let the main goroutine sleeps for 10 milli-seconds.<br/>
+So, basically it is not terminated yet and with that we could pass the control to our second goroutine.<br/>
+Okay, that's cool so far, but what if we have many goroutines? You may answer by putting a random <i>time.Sleep</i> in the code.<br/>
+Well, it could work, but at certain point you will not have any clue about how much goroutines you have, but it is okay let's suppose that you know how much goroutines you will be handling<br/>
+In the other hand, you will not have any idea about how much data you will be working with, and you will not be able to get data back from other goroutines.<br/>
+And the Sleep func is most likely a hack and is not recommended to use it in production.<br/>
+Here where we can make use of <b>channels</b>. I will be talking about this probably in the 3rd part.<br/>
+<br/>
+<b>o/</b>
 
