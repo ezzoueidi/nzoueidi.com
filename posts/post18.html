@@ -1,0 +1,29 @@
+<title> Goroutines and Go runtime scheduler </title>
+<center> <b> Goroutines and Go runtime scheduler </b> </center>
+<br/>
+<hr/>
+<br/>
+
+By talking about <b>Goroutines</b>, the first thought that will come to your mind is <b>Concurrency</b>.<br/>
+Which is somehow true, I will not define here what is Concurrency and how it is different than Parallelism. <br/>
+<b> Goroutines </b> exists only in the virtual space of go runtime and not in the OS. <br/>
+and they are managed by <b>Go Runtime scheduler</b> which is needed to handle the whole lifecycle of given goroutines.<br/>
+
+				 ------------------------------------------------------------
+				|                  			  		     |
+				|    			Go Program    		 	     |
+				|____________________________________________________________|
+				     ⮁ 		             ⮁                           ⮁
+			       Memory allocation     Channel communication     Creation of goroutines
+			             ⮁                       ⮁                           ⮁
+				      -----------------------------------------------------
+				     |                                                     |
+				     |                     Runtime                         |
+				     |_____________________________________________________|
+				               ↓                               ↓
+					    Syscalls                     Thread creation
+					       ↓                               ↓
+					       ---------------------------------
+					      |           OS kernel             |
+					      |_________________________________|
+
